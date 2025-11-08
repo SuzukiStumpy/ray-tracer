@@ -36,7 +36,7 @@ class Tuple:
 
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, type(self)):
-            raise NotImplementedError
+            return False
 
         return (
             self.x == other.x
