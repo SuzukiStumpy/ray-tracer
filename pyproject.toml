@@ -48,6 +48,9 @@ line-length = 88
 lint.fixable = ["ALL"]
 lint.unfixable = []
 
+[tool.ruff.lint.isort]
+
+
 [tool.uv.build-backend]
 module-root = ""
 module-name = "ray_tracer"

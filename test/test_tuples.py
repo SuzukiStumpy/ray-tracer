@@ -31,3 +31,15 @@ class TestTuples:
         assert math.isclose(a.z, z, abs_tol=const.EPSILON)
         assert math.isclose(a.w, w, abs_tol=const.EPSILON)
         assert type(a) is klass
+
+    def test_points_are_tuples_with_w_1(self) -> None:
+        a: Point = Point(4, -4, 3)
+        b: object = Tuple(4, -4, 3, 1)
+
+        assert a == b
+
+    def test_vectors_are_tuples_with_w_0(self) -> None:
+        a: Vector = Vector(4, -4, 3)
+        b = Tuple(4, -4, 3, 0)
+
+        assert a == b

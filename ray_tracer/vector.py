@@ -1,5 +1,5 @@
 import inspect
-from typing import overload
+from typing import cast, overload
 
 from .base_tuple import Tuple
 
@@ -20,6 +20,9 @@ class Vector(Tuple):
         # Tuple(...) factory. Ignore the provided `w` and always initialize
         # vectors with w == 0.0.
         super().__init__(x, y, z, 0.0)
+
+    def __new__(cls, x: float, y: float, z: float) -> Vector:
+        return cast(cls, super().__new__(cls, x, y, z, 0))
 
 
 # Hide the optional `w` parameter from runtime introspection (inspect.signature

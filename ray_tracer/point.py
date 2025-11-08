@@ -1,5 +1,5 @@
 import inspect
-from typing import overload
+from typing import cast, overload
 
 from .base_tuple import Tuple
 
@@ -22,6 +22,9 @@ class Point(Tuple):
         # returned object's class is Point. We ignore the passed `w` and
         # always initialize a Point with w == 1.0.
         super().__init__(x, y, z, 1.0)
+
+    def __new__(cls, x: float, y: float, z: float) -> Point:
+        return cast(cls, super().__new__(cls, x, y, z, 1))
 
 
 # Hide the optional `w` parameter from runtime introspection (inspect.signature

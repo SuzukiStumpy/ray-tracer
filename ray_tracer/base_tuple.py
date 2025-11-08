@@ -33,3 +33,14 @@ class Tuple:
         s = f"{self.__class__.__name__}(x={self.x}, y={self.y}, z={self.z}"
         s += f", w={self.w})" if type(self) is Tuple else ")"
         return s
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, type(self)):
+            raise NotImplementedError
+
+        return (
+            self.x == other.x
+            and self.y == other.y
+            and self.z == other.z
+            and self.w == other.w
+        )
