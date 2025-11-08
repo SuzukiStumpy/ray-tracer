@@ -2,8 +2,8 @@ import inspect
 import math
 from typing import cast, overload
 
+from ..constants import EPSILON
 from .base_tuple import Tuple
-from .constants import EPSILON
 
 
 class Vector(Tuple):

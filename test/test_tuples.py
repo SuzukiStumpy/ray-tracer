@@ -4,9 +4,9 @@ from typing import cast
 import pytest
 
 import ray_tracer.constants as const
-from ray_tracer.base_tuple import Tuple
-from ray_tracer.point import Point
-from ray_tracer.vector import Vector
+from ray_tracer.classes.base_tuple import Tuple
+from ray_tracer.classes.point import Point
+from ray_tracer.classes.vector import Vector
 
 
 class TestTuples:
