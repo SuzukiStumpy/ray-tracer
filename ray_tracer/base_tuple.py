@@ -89,3 +89,25 @@ class Tuple:
             -self.z,
             -self.w if self.__class__.__name__ != "Point" else self.w,
         )
+
+    def __mul__(self, other: float) -> object:
+        return Tuple(
+            self.x * other,
+            self.y * other,
+            self.z * other,
+            self.w * other,
+        )
+
+    def __rmul__(self, other: float) -> object:
+        return self * other
+
+    def __truediv__(self, other: float) -> object:
+        if math.isclose(other, 0.0, rel_tol=EPSILON):
+            raise ZeroDivisionError
+
+        return Tuple(
+            self.x / other,
+            self.y / other,
+            self.z / other,
+            self.w / other,
+        )

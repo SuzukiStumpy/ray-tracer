@@ -117,3 +117,22 @@ class TestTuples:
         a = Point(1, -2, 3)
 
         assert -a == Point(-1, 2, -3)
+
+    def test_scalar_multiplication_of_a_tuple(self) -> None:
+        a = Tuple(1, -2, 3, -4)
+
+        assert a * 3.5 == Tuple(3.5, -7, 10.5, -14)
+
+        # Also test that it works the other way around (using __rmul__)
+        assert 3.5 * a == Tuple(3.5, -7, 10.5, -14)
+
+    def test_scalar_multiplication_by_a_fractional_amount(self) -> None:
+        a = Tuple(1, -2, 3, -4)
+
+        assert a * 0.5 == Tuple(0.5, -1, 1.5, -2)
+        assert 0.5 * a == Tuple(0.5, -1, 1.5, -2)
+
+    def test_scalar_division(self) -> None:
+        a = Tuple(1, -2, 3, -4)
+
+        assert a / 2 == Tuple(0.5, -1, 1.5, -2)
