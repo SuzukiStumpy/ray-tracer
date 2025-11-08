@@ -34,12 +34,86 @@ class TestTuples:
 
     def test_points_are_tuples_with_w_1(self) -> None:
         a: Point = Point(4, -4, 3)
-        b: object = Tuple(4, -4, 3, 1)
 
-        assert a == b
+        assert a == Tuple(4, -4, 3, 1)
 
     def test_vectors_are_tuples_with_w_0(self) -> None:
         a: Vector = Vector(4, -4, 3)
-        b = Tuple(4, -4, 3, 0)
 
-        assert a == b
+        assert a == Tuple(4, -4, 3, 0)
+
+    def test_adding_two_tuples(self) -> None:
+        a1 = Tuple(3, -2, 5, 1)
+        a2 = Tuple(-2, 3, 1, 0)
+
+        assert a1 + a2 == Tuple(1, 1, 6, 1)
+
+    def test_adding_point_to_vector_gives_new_point(self) -> None:
+        a1 = Point(1, 2, 3)
+        a2 = Vector(1, 2, 3)
+
+        assert a1 + a2 == Point(2, 4, 6)
+
+    def test_adding_vector_to_vector_gives_new_vector(self) -> None:
+        a1 = Vector(1, 2, 3)
+        a2 = Vector(1, 2, 3)
+
+        assert a1 + a2 == Vector(2, 4, 6)
+
+    def test_cannot_add_two_points(self) -> None:
+        a1 = Point(3, -2, 5)
+        a2 = Point(3, -2, 1)
+
+        with pytest.raises(TypeError, match="adding two points is unsupported"):
+            a1 + a2
+
+    def test_subtracting_two_points_gives_vector(self) -> None:
+        a1 = Point(3, 2, 1)
+        a2 = Point(5, 6, 7)
+
+        assert a1 - a2 == Vector(-2, -4, -6)
+
+    def test_subtracting_vector_from_point_gives_point(self) -> None:
+        a1 = Point(3, 2, 1)
+        a2 = Vector(5, 6, 7)
+
+        assert a1 - a2 == Point(-2, -4, -6)
+
+    def test_subtracting_two_vectors_gives_vector(self) -> None:
+        a1 = Vector(3, 2, 1)
+        a2 = Vector(5, 6, 7)
+
+        assert a1 - a2 == Vector(-2, -4, -6)
+
+    def test_cannot_subtract_point_from_vector(self) -> None:
+        a1 = Vector(3, 2, 1)
+        a2 = Point(5, 6, 7)
+
+        with pytest.raises(
+            TypeError,
+            match="unsupported operation 'Vector' - 'Point'",
+        ):
+            a1 - a2
+
+    def test_subtracting_vector_from_zero_vector_yields_inverse(self) -> None:
+        zero = Vector(0, 0, 0)
+        v = Vector(1, -2, 3)
+
+        assert zero - v == Vector(-1, 2, -3)
+
+    def test_a_tuple_can_be_negated(self) -> None:
+        a = Tuple(1, -2, 3, -4)
+
+        assert -a == Tuple(-1, 2, -3, 4)
+
+    def test_a_vector_can_be_negated(self) -> None:
+        a = Vector(1, -2, 3)
+
+        assert -a == Vector(-1, 2, -3)
+
+    # This one probably doesn't make too much sense
+    # (point reflects around X, Y and Z axes)
+    def test_a_point_can_be_negated(self) -> None:
+        a = Point(1, -2, 3)
+
+        assert -a == Point(-1, 2, -3)

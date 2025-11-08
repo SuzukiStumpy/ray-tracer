@@ -44,3 +44,48 @@ class Tuple:
             and self.z == other.z
             and self.w == other.w
         )
+
+    def __add__(self, other: Tuple) -> object:
+        if other.__class__.__name__ not in ["Point", "Vector"]:
+            raise TypeError(
+                f"unsupported operand type(s) for +: '{self.__class__.__name__}'"
+                f" and '{other.__class__.__name__}'"
+            )
+
+        if self.w + other.w > 1.0:
+            raise TypeError("adding two points is unsupported")
+
+        return Tuple(
+            self.x + other.x,
+            self.y + other.y,
+            self.z + other.z,
+            self.w + other.w,
+        )
+
+    def __sub__(self, other: Tuple) -> object:
+        if other.__class__.__name__ not in ["Point", "Vector"]:
+            raise TypeError(
+                f"unsupported operand type(s) for -: '{self.__class__.__name__}'"
+                f" and '{other.__class__.__name__}'"
+            )
+
+        if self.w - other.w < 0.0:
+            raise TypeError(
+                f"unsupported operation '{self.__class__.__name__}' -"
+                f" '{other.__class__.__name__}'"
+            )
+
+        return Tuple(
+            self.x - other.x,
+            self.y - other.y,
+            self.z - other.z,
+            self.w - other.w,
+        )
+
+    def __neg__(self) -> object:
+        return Tuple(
+            -self.x,
+            -self.y,
+            -self.z,
+            -self.w if self.__class__.__name__ != "Point" else self.w,
+        )
