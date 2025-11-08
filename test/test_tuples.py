@@ -182,3 +182,10 @@ class TestTuples:
 
         assert a.dot(b) == 20
         assert b.dot(a) == a.dot(b)
+
+    def test_the_cross_product_of_two_vectors(self) -> None:
+        a = Vector(1, 2, 3)
+        b = Vector(2, 3, 4)
+
+        assert a.cross(b) == Vector(-1, 2, -1)
+        assert b.cross(a) == -a.cross(b)

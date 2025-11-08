@@ -47,6 +47,14 @@ class Vector(Tuple):
         """Return the dot product of two vectors"""
         return self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
 
+    def cross(self, other: Vector) -> Vector:
+        """Returns the cross product of two vectors"""
+        return Vector(
+            self.y * other.z - self.z * other.y,
+            self.z * other.x - self.x * other.z,
+            self.x * other.y - self.y * other.x,
+        )
+
 
 # Hide the optional `w` parameter from runtime introspection (inspect.signature
 # and help()) by setting a custom Signature that shows only (x, y, z).
