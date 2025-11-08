@@ -1,7 +1,55 @@
 [project]
 name = "ray-tracer"
 version = "0.1.0"
-description = "Add your description here"
+description = "A software ray tracer written in Python"
 readme = "README.md"
-requires-python = ">=3.13"
+requires-python = ">=3.14"
 dependencies = []
+
+[build-system]
+requires = ["uv_build"]
+build-backend = "uv_build"
+
+[project.scripts]
+test = "ray_tracer.main:test"
+
+[dependency-groups]
+dev = [
+    "pyrefly>=0.40.1",
+    "pytest>=8.4.2",
+    "ruff>=0.14.4",
+]
+
+[tool]
+
+[tool.pyrefly]
+project-includes = [
+    "ray_tracer",
+    "test",
+    "**/*.py*",
+    "**/*.ipynb",
+]
+project-excludes = [
+    "**/__pycache__",
+    "**/*venv/**",
+    "**/.[!/.]*/**",
+]
+search-path = ["ray_tracer"]
+site-package-path = [".venv/Lib/site-packages"]
+use-ignore-files = true
+
+[tool.ruff]
+# Enable selected rules to enforce type annotations and related checks
+lint.select = ["ANN", "E", "F", "W", "C"]
+# You can fine-tune which ANN rules to enforce; the following enables
+# requiring annotations on functions and methods and forbids call sites
+# without annotations where applicable.
+lint.extend-select = ["ANN"]
+lint.ignore = ["E203"]
+line-length = 88
+
+
+[tool.uv.build-backend]
+module-root = ""
+module-name = "ray_tracer"
+

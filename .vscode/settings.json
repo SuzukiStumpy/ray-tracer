@@ -4,5 +4,7 @@
         "titleBar.activeBackground": "#65320D",
         "titleBar.activeForeground": "#FEFAF6"
     },
-    "iis.configDir": ""
+    "iis.configDir": "",
+    "python.analysis.typeCheckingMode": "strict",
+    "python.terminal.activateEnvironment": true
 }
