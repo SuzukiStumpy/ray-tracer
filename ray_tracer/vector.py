@@ -31,6 +31,7 @@ class Vector(Tuple):
         return math.sqrt(self.x**2 + self.y**2 + self.z**2 + self.w**2)
 
     def normalize(self) -> Vector:
+        """Scales a vector down to its equivalent unit vector"""
         magnitude = abs(self)
 
         if math.isclose(magnitude, 0.0, rel_tol=EPSILON):
@@ -41,6 +42,10 @@ class Vector(Tuple):
             self.y / magnitude,
             self.z / magnitude,
         )
+
+    def dot(self, other: Vector) -> float:
+        """Return the dot product of two vectors"""
+        return self.x * other.x + self.y * other.y + self.z * other.z + self.w * other.w
 
 
 # Hide the optional `w` parameter from runtime introspection (inspect.signature

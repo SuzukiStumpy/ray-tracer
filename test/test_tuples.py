@@ -175,3 +175,10 @@ class TestTuples:
         v = test_input
 
         assert v.normalize() == expected
+
+    def test_vector_dot_product(self) -> None:
+        a = Vector(1, 2, 3)
+        b = Vector(2, 3, 4)
+
+        assert a.dot(b) == 20
+        assert b.dot(a) == a.dot(b)
