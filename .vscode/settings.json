@@ -1,0 +1,8 @@
+{
+    "workbench.colorCustomizations": {
+        "activityBar.background": "#482409",
+        "titleBar.activeBackground": "#65320D",
+        "titleBar.activeForeground": "#FEFAF6"
+    },
+    "iis.configDir": ""
+}
