@@ -39,10 +39,10 @@ class Tuple:
             return False
 
         return (
-            self.x == other.x
-            and self.y == other.y
-            and self.z == other.z
-            and self.w == other.w
+            math.isclose(self.x, other.x, abs_tol=EPSILON)
+            and math.isclose(self.y, other.y, abs_tol=EPSILON)
+            and math.isclose(self.z, other.z, abs_tol=EPSILON)
+            and math.isclose(self.w, other.w, abs_tol=EPSILON)
         )
 
     def __add__(self, other: Tuple) -> object:

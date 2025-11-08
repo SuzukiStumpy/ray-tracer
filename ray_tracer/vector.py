@@ -1,7 +1,9 @@
 import inspect
+import math
 from typing import cast, overload
 
 from .base_tuple import Tuple
+from .constants import EPSILON
 
 
 class Vector(Tuple):
@@ -23,6 +25,22 @@ class Vector(Tuple):
 
     def __new__(cls, x: float, y: float, z: float) -> Vector:
         return cast(cls, super().__new__(cls, x, y, z, 0))
+
+    def __abs__(self) -> float:
+        """Returns the magnitude of the vector"""
+        return math.sqrt(self.x**2 + self.y**2 + self.z**2 + self.w**2)
+
+    def normalize(self) -> Vector:
+        magnitude = abs(self)
+
+        if math.isclose(magnitude, 0.0, rel_tol=EPSILON):
+            raise ZeroDivisionError("vector has magnitude of zero")
+
+        return Vector(
+            self.x / magnitude,
+            self.y / magnitude,
+            self.z / magnitude,
+        )
 
 
 # Hide the optional `w` parameter from runtime introspection (inspect.signature

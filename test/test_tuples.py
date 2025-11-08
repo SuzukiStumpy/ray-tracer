@@ -136,3 +136,42 @@ class TestTuples:
         a = Tuple(1, -2, 3, -4)
 
         assert a / 2 == Tuple(0.5, -1, 1.5, -2)
+
+    @pytest.mark.parametrize(
+        "test_input,expected",
+        [
+            pytest.param(Vector(1, 0, 0), 1.0, id="unit vector x"),
+            pytest.param(Vector(0, 1, 0), 1.0, id="unit vector y"),
+            pytest.param(Vector(0, 0, 1), 1.0, id="unit vector z"),
+            pytest.param(Vector(1, 2, 3), math.sqrt(14), id="positive non-unit vector"),
+            pytest.param(
+                Vector(-1, -2, -3), math.sqrt(14), id="negative non-unit vector"
+            ),
+        ],
+    )
+    def test_vectors_can_return_their_magnitude(
+        self, test_input: Vector, expected: float
+    ) -> None:
+        v = test_input
+
+        assert abs(v) == expected
+
+    @pytest.mark.parametrize(
+        "test_input,expected",
+        [
+            pytest.param(Vector(4, 0, 0), Vector(1, 0, 0), id="parallel to x"),
+            pytest.param(
+                Vector(1, 2, 3),
+                Vector(0.26726, 0.53452, 0.80178),
+                id="non parallel vector",
+            ),
+        ],
+    )
+    def test_vector_normalization(
+        self,
+        test_input: Vector,
+        expected: Vector,
+    ) -> None:
+        v = test_input
+
+        assert v.normalize() == expected
