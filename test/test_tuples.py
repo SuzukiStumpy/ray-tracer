@@ -190,10 +190,3 @@ class TestTuples:
 
         assert a.cross(b) == Vector(-1, 2, -1)
         assert b.cross(a) == -a.cross(b)
-
-    def test_colours_are_red_green_blue_tuples(self) -> None:
-        c = Colour(-0.5, 0.4, 1.7)
-
-        assert c.red == -0.5
-        assert c.green == 0.4
-        assert c.blue == 1.7

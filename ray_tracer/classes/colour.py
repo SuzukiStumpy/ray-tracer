@@ -44,7 +44,7 @@ class Colour(AbstractTuple):
 
     @property
     def alpha(self) -> float:
-        return self.alpha
+        return self.a
 
     @overload
     def __add__(self, other: Colour) -> Self: ...
