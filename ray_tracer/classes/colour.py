@@ -1,6 +1,6 @@
+from enum import Enum
 from typing import Self, overload
 
-from ..utils import clamp
 from .abstract_tuple import AbstractTuple
 
 
@@ -76,7 +76,7 @@ class Colour(AbstractTuple):
     def __mul__(self, other: AbstractTuple | float) -> Self: ...
 
     def __mul__(self, other: AbstractTuple | float) -> Self:
-        if not isinstance(other, (Colour, float)):
+        if not isinstance(other, (Colour, float, int)):
             raise NotImplementedError(
                 "You can multiply colours by scalars or other Colours only"
             )
@@ -97,3 +97,10 @@ class Colour(AbstractTuple):
 
     def __truediv__(self, other: float) -> Self:
         raise NotImplementedError
+
+
+class Colours(Enum):
+    """Define some basic named colours"""
+
+    BLACK = Colour(0.0, 0.0, 0.0)
+    WHITE = Colour(1.0, 1.0, 1.0)

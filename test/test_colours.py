@@ -1,9 +1,3 @@
-import math
-from typing import Collection, cast
-
-import pytest
-
-import ray_tracer.constants as const
 from ray_tracer.classes.colour import Colour
 
 
@@ -15,13 +9,12 @@ class TestColours:
         assert c.green == 0.4
         assert c.blue == 1.7
 
-    def test_rgba_are_synonyms_for_red_green_blue_alpha(self) -> None:
+    def test_rgb_are_synonyms_for_red_green_blue(self) -> None:
         c = Colour(-0.5, 0.1, 1.7)
 
         assert c.r == c.red
         assert c.g == c.green
         assert c.b == c.blue
-        assert c.a == c.alpha
 
     def test_colours_can_be_added_together(self) -> None:
         c1 = Colour(0.9, 0.6, 0.75)

@@ -5,7 +5,6 @@ import pytest
 
 import ray_tracer.constants as const
 from ray_tracer.classes.base_tuple import Tuple
-from ray_tracer.classes.colour import Colour
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.vector import Vector
 
