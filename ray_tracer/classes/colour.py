@@ -1,18 +1,17 @@
 from typing import Self, overload
 
+from ..utils import clamp
 from .abstract_tuple import AbstractTuple
 
 
 class Colour(AbstractTuple):
     """Defines an RGB colour"""
 
-    def __init__(self, r: float, g: float, b: float, a: float = 1.0) -> None:
-        super().__init__(x=r, y=g, z=b, w=a)
+    def __init__(self, r: float, g: float, b: float) -> None:
+        super().__init__(x=r, y=g, z=b, w=1.0)
 
     def __repr__(self: Self) -> str:
-        return (
-            f"{self.__class__.__name__}(r={self.r}, g={self.g}, b={self.b}, a={self.a})"
-        )
+        return f"{self.__class__.__name__}(r={self.r}, g={self.g}, b={self.b})"
 
     @property
     def r(self) -> float:
@@ -38,14 +37,6 @@ class Colour(AbstractTuple):
     def blue(self) -> float:
         return self.b
 
-    @property
-    def a(self) -> float:
-        return self.w
-
-    @property
-    def alpha(self) -> float:
-        return self.a
-
     @overload
     def __add__(self, other: Colour) -> Self: ...
 
@@ -53,30 +44,56 @@ class Colour(AbstractTuple):
     def __add__(self, other: AbstractTuple) -> AbstractTuple: ...
 
     def __add__(self, other: AbstractTuple) -> AbstractTuple:
-        # Only allow adding two Colour instances; for other types return
-        # NotImplemented so Python can try reflected operations or raise.
         if not isinstance(other, Colour):
             raise NotImplementedError
 
-        # Construct the result as a Colour. Use a short multi-line call to
-        # satisfy line-length linting and silence the abstract-instantiation
-        # type checker here (Colour may be flagged abstract by the checker
-        # even though runtime construction is intended).
         return Colour(
             self.r + other.r,
             self.g + other.g,
             self.b + other.b,
-            self.a + other.a,
         )
 
     def __sub__(self, other: AbstractTuple) -> AbstractTuple:
-        raise NotImplementedError
+        if not isinstance(other, Colour):
+            raise NotImplementedError
+
+        return Colour(
+            self.r - other.r,
+            self.g - other.g,
+            self.b - other.b,
+        )
 
     def __neg__(self) -> Self:
         raise NotImplementedError
 
-    def __mul__(self, other: float) -> Self:
-        raise NotImplementedError
+    @overload
+    def __mul__(self, other: float) -> Self: ...
+
+    @overload
+    def __mul__(self, other: Colour) -> Self: ...
+
+    @overload
+    def __mul__(self, other: AbstractTuple | float) -> Self: ...
+
+    def __mul__(self, other: AbstractTuple | float) -> Self:
+        if not isinstance(other, (Colour, float)):
+            raise NotImplementedError(
+                "You can multiply colours by scalars or other Colours only"
+            )
+
+        return (
+            Colour(
+                self.r * other.r,
+                self.g * other.g,
+                self.b * other.b,
+            )
+            if isinstance(other, Colour)
+            else Colour(
+                self.r * other,
+                self.g * other,
+                self.b * other,
+            )
+        )
 
     def __truediv__(self, other: float) -> Self:
         raise NotImplementedError

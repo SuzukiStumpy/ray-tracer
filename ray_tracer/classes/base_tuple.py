@@ -1,7 +1,7 @@
 """Defines the base tuple class from which points and vectors are derived"""
 
 import math
-from typing import Self, cast
+from typing import Self, cast, overload
 
 from ..constants import EPSILON
 from .abstract_tuple import AbstractTuple
@@ -105,10 +105,20 @@ class Tuple(AbstractTuple):
             ),
         )
 
-    def __mul__(self: Self, other: float) -> Self:
+    @overload
+    def __mul__(self: Self, other: float) -> Self: ...
+
+    @overload
+    def __mul__(self: Self, other: float | AbstractTuple) -> Self: ...
+
+    def __mul__(self: Self, other: float | AbstractTuple) -> Self:
         # Preserve the runtime subclass when multiplying by a scalar.
         from .point import Point
         from .vector import Vector
+
+        # It's only legal to multiply points and vectors by scalars in this method
+        if not isinstance(other, float):
+            raise NotImplementedError
 
         if isinstance(self, (Point, Vector)):
             if isinstance(self, Point):

@@ -1,7 +1,7 @@
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Self
+from typing import Self, overload
 
 from ..constants import EPSILON
 
@@ -49,7 +49,7 @@ class AbstractTuple(ABC):
         """Define unary negation for a type derived from AbstractTuple"""
 
     @abstractmethod
-    def __mul__(self, other: float) -> Self:
+    def __mul__(self, other: AbstractTuple | float) -> Self:
         """Define multiplication by scalar in the form:  s * Self"""
 
     def __rmul__(self, other: float) -> Self:
