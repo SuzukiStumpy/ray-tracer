@@ -15,4 +15,10 @@ class TestCanvas:
         c = Canvas(10, 20)
 
         for x, y in product(range(c.width), range(c.height)):
-            c.pixel(x, y) == Colours.BLACK
+            c.get_pixel(x, y) == Colours.BLACK
+
+    def test_writing_pixels_to_a_canvas(self) -> None:
+        c = Canvas(10, 20)
+        c.set_pixel(2, 3, Colours.RED)
+
+        assert c.get_pixel(2, 3) == Colours.RED

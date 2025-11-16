@@ -1,4 +1,3 @@
-from enum import Enum
 from typing import Self, overload
 
 from .abstract_tuple import AbstractTuple
@@ -99,8 +98,19 @@ class Colour(AbstractTuple):
         raise NotImplementedError
 
 
-class Colours(Enum):
+class Colours:
     """Define some basic named colours"""
 
     BLACK = Colour(0.0, 0.0, 0.0)
+    RED = Colour(1.0, 0.0, 0.0)
+    GREEN = Colour(0.0, 1.0, 0.0)
+    BLUE = Colour(0.0, 0.0, 1.0)
     WHITE = Colour(1.0, 1.0, 1.0)
+
+    @classmethod
+    def values(cls) -> list[Colour]:
+        return [
+            v
+            for k, v in cls.__dict__.items()
+            if not k.startswith("_") and not callable(v)
+        ]
