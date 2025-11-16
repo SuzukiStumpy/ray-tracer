@@ -45,17 +45,17 @@ class AbstractTuple(ABC):
         """Define subtraction of two types derived from AbstractTuple"""
 
     @abstractmethod
-    def __neg__(self: Self) -> Self:
+    def __neg__(self) -> Self:
         """Define unary negation for a type derived from AbstractTuple"""
 
     @abstractmethod
-    def __mul__(self: Self, other: float) -> Self:
+    def __mul__(self, other: float) -> Self:
         """Define multiplication by scalar in the form:  s * Self"""
 
-    def __rmul__(self: Self, other: float) -> Self:
+    def __rmul__(self, other: float) -> Self:
         """Define multiplication by scalar in form:  Self * s"""
         return self * other
 
     @abstractmethod
-    def __truediv__(self: Self, other: float) -> Self:
+    def __truediv__(self, other: float) -> Self:
         """Define division by a scalar value for a type derived from AbstractTuple"""
