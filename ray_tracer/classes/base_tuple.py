@@ -4,9 +4,10 @@ import math
 from typing import Self, cast
 
 from ..constants import EPSILON
+from .abstract_tuple import AbstractTuple
 
 
-class Tuple:
+class Tuple(AbstractTuple):
     """Base tuple class used by points and vectors"""
 
     def __init__(self, x: float, y: float, z: float, w: float) -> None:
@@ -15,7 +16,7 @@ class Tuple:
         self.z = z
         self.w = w
 
-    def __new__(cls, x: float, y: float, z: float, w: float | None = None) -> "Tuple":
+    def __new__(cls, x: float, y: float, z: float, w: float | None = None) -> Tuple:
         # Import Point/Vector lazily to avoid circular imports during module
         # initialization (point.py and vector.py import this module).
         from .point import Point
@@ -36,23 +37,10 @@ class Tuple:
 
         return new_obj  # type: ignore
 
-    def __repr__(self) -> str:
-        s = f"{self.__class__.__name__}(x={self.x}, y={self.y}, z={self.z}"
-        s += f", w={self.w})" if type(self) is Tuple else ")"
-        return s
+    def __repr__(self: Self) -> str:
+        return super(self).__repr__()
 
-    def __eq__(self, other: object) -> bool:
-        if not isinstance(other, type(self)):
-            return False
-
-        return (
-            math.isclose(self.x, other.x, abs_tol=EPSILON)
-            and math.isclose(self.y, other.y, abs_tol=EPSILON)
-            and math.isclose(self.z, other.z, abs_tol=EPSILON)
-            and math.isclose(self.w, other.w, abs_tol=EPSILON)
-        )
-
-    def __add__(self, other: "Tuple") -> "Tuple":
+    def __add__(self, other: AbstractTuple) -> AbstractTuple:
         if other.__class__.__name__ not in ["Point", "Vector"]:
             raise TypeError(
                 f"unsupported operand type(s) for +: '{self.__class__.__name__}'"
@@ -69,7 +57,7 @@ class Tuple:
             self.w + other.w,
         )
 
-    def __sub__(self, other: "Tuple") -> "Tuple":
+    def __sub__(self, other: AbstractTuple) -> AbstractTuple:
         if other.__class__.__name__ not in ["Point", "Vector"]:
             raise TypeError(
                 f"unsupported operand type(s) for -: '{self.__class__.__name__}'"

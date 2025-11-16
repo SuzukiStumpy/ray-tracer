@@ -26,6 +26,9 @@ class Vector(Tuple):
     def __new__(cls, x: float, y: float, z: float) -> Vector:
         return cast(cls, super().__new__(cls, x, y, z, 0))
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(x={self.x}, y={self.y}, z={self.z})"
+
     def __abs__(self) -> float:
         """Returns the magnitude of the vector"""
         return math.sqrt(self.x**2 + self.y**2 + self.z**2 + self.w**2)

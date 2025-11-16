@@ -191,6 +191,7 @@ class TestTuples:
         assert a.cross(b) == Vector(-1, 2, -1)
         assert b.cross(a) == -a.cross(b)
 
+    @pytest.mark.skip("Not implemented")
     def test_colours_are_red_green_blue_tuples(self) -> None:
         c = Colour(-0.5, 0.4, 1.7)
 

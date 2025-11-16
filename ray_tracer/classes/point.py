@@ -26,6 +26,9 @@ class Point(Tuple):
     def __new__(cls, x: float, y: float, z: float) -> Point:
         return cast(cls, super().__new__(cls, x, y, z, 1))
 
+    def __repr__(self) -> str:
+        return f"{self.__class__.__name__}(x={self.x}, y={self.y}, z={self.z})"
+
 
 # Hide the optional `w` parameter from runtime introspection (inspect.signature
 # and help()) by setting a custom Signature that shows only (x, y, z).
