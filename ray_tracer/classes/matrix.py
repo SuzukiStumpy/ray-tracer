@@ -1,4 +1,7 @@
+import math
+
 import numpy as np
+from numpy.linalg import LinAlgError
 
 from ray_tracer.classes.base_tuple import Tuple
 from ray_tracer.constants import EPSILON
@@ -67,6 +70,15 @@ class Matrix:
     def cofactor(self, row: int, col: int) -> float:
         m = self.minor(row, col)
         return m if (row + col) % 2 == 0 else -m
+
+    def is_invertible(self) -> bool:
+        return not math.isclose(self.det(), 0, rel_tol=EPSILON)
+
+    def inverse(self) -> Matrix:
+        if not self.is_invertible():
+            raise LinAlgError("Matrix is not invertible")
+
+        return Matrix(np.linalg.inv(self.data))
 
     @classmethod
     def Identity(cls, size: int = 4) -> Matrix:
