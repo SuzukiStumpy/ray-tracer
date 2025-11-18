@@ -29,8 +29,8 @@ class TestRays:
         xs = r.intersect(s)
 
         assert len(xs) == 2
-        assert xs[0] == 4.0
-        assert xs[1] == 6.0
+        assert xs[0].t == 4.0
+        assert xs[1].t == 6.0
 
     def test_a_ray_intersects_a_sphere_at_a_tangent(self) -> None:
         r = Ray(Point(0, 1, -5), Vector(0, 0, 1))
@@ -39,8 +39,8 @@ class TestRays:
         xs = r.intersect(s)
 
         assert len(xs) == 2
-        assert xs[0] == 5.0
-        assert xs[1] == 5.0
+        assert xs[0].t == 5.0
+        assert xs[1].t == 5.0
 
     def test_a_ray_misses_a_sphere(self) -> None:
         r = Ray(Point(0, 2, -5), Vector(0, 0, 1))
@@ -57,8 +57,8 @@ class TestRays:
         xs = r.intersect(s)
 
         assert len(xs) == 2
-        assert xs[0] == -1.0
-        assert xs[1] == 1.0
+        assert xs[0].t == -1.0
+        assert xs[1].t == 1.0
 
     def test_a_sphere_is_behind_a_ray(self) -> None:
         r = Ray(Point(0, 0, 5), Vector(0, 0, 1))
@@ -67,5 +67,5 @@ class TestRays:
         xs = r.intersect(s)
 
         assert len(xs) == 2
-        assert xs[0] == -6.0
-        assert xs[1] == -4.0
+        assert xs[0].t == -6.0
+        assert xs[1].t == -4.0

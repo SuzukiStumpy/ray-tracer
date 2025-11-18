@@ -1,6 +1,7 @@
 import math
 from typing import cast
 
+from ray_tracer.classes.intersection import Intersection
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.vector import Vector
 from ray_tracer.objects.abstract_object import AbstractObject
@@ -14,7 +15,7 @@ class Ray:
     def position(self, time: float) -> Point:
         return cast(Point, self.origin + (time * self.direction))
 
-    def intersect(self, object: AbstractObject) -> list[float]:
+    def intersect(self, obj: AbstractObject) -> list[Intersection]:
         # the vector from the object's centre to the ray origin (the object
         # is always centered on the world origin)
         object_to_ray = cast(Vector, self.origin - Point(0, 0, 0))
@@ -29,4 +30,7 @@ class Ray:
             return []
 
         discriminant_root = math.sqrt(discriminant)
-        return [(-b - discriminant_root) / (2 * a), (-b + discriminant_root) / (2 * a)]
+        return [
+            Intersection((-b - discriminant_root) / (2 * a), obj),
+            Intersection((-b + discriminant_root) / (2 * a), obj),
+        ]

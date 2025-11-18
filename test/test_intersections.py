@@ -1,0 +1,77 @@
+from ray_tracer.classes.intersection import Intersection
+from ray_tracer.classes.point import Point
+from ray_tracer.classes.ray import Ray
+from ray_tracer.classes.vector import Vector
+from ray_tracer.objects.sphere import Sphere
+
+
+class TestIntersections:
+    def test_an_intersection_encapsulates_time_and_object(self) -> None:
+        s = Sphere()
+        i = Intersection(3.5, s)
+
+        assert i.t == 3.5
+        assert i.obj == s
+
+    def test_aggregating_intersections(self) -> None:
+        s = Sphere()
+        i1 = Intersection(1, s)
+        i2 = Intersection(2, s)
+
+        xs = [i1, i2]
+
+        assert len(xs) == 2
+        assert xs[0].t == 1
+        assert xs[1].t == 2
+
+    def test_intersect_sets_the_object_on_the_intersection(self) -> None:
+        r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
+        s = Sphere()
+
+        xs = r.intersect(s)
+
+        assert len(xs) == 2
+        assert xs[0].obj == s
+        assert xs[1].obj == s
+
+    def test_the_hit_when_all_intersections_have_positive_t(self) -> None:
+        s = Sphere()
+        i1 = Intersection(1, s)
+        i2 = Intersection(2, s)
+        xs = [i1, i2]
+
+        i = Intersection.hit(xs)
+
+        assert i == i1
+
+    def test_the_hit_when_some_intersections_have_negative_t(self) -> None:
+        s = Sphere()
+        i1 = Intersection(-1, s)
+        i2 = Intersection(1, s)
+        xs = [i2, i1]
+
+        i = Intersection.hit(xs)
+
+        assert i == i2
+
+    def test_the_hit_when_all_intersections_have_negative_t(self) -> None:
+        s = Sphere()
+        i1 = Intersection(-2, s)
+        i2 = Intersection(-1, s)
+        xs = [i2, i1]
+
+        i = Intersection.hit(xs)
+
+        assert i is None
+
+    def test_the_hit_is_always_the_lowest_nonnegative_intersection(self) -> None:
+        s = Sphere()
+        i1 = Intersection(5, s)
+        i2 = Intersection(7, s)
+        i3 = Intersection(-3, s)
+        i4 = Intersection(2, s)
+        xs = [i1, i2, i3, i4]
+
+        i = Intersection.hit(xs)
+
+        assert i == i4
