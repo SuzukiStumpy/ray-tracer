@@ -117,7 +117,7 @@ class Tuple(AbstractTuple):
         from .vector import Vector
 
         # It's only legal to multiply points and vectors by scalars in this method
-        if not isinstance(other, float):
+        if not isinstance(other, (float, int)):
             raise NotImplementedError
 
         if isinstance(self, (Point, Vector)):
