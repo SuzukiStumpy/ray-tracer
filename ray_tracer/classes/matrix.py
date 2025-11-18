@@ -26,6 +26,12 @@ class Matrix:
 
         return self.data[index]
 
+    def __setitem__(self, index: tuple[int, int], value: float) -> None:
+        if 0 > index[0] >= self.size or 0 > index[1] >= self.size:
+            raise IndexError(f"Index [{index[0]}, {index[1]}] is out of bounds")
+
+        self.data[index[0], index[1]] = value
+
     def __eq__(self, other: object) -> bool:
         if not isinstance(other, Matrix):
             return False
