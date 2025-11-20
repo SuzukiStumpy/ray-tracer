@@ -1,7 +1,7 @@
 import math
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
-from typing import Self, overload
+from typing import Self
 
 from ..constants import EPSILON
 

@@ -57,6 +57,12 @@ class Tuple(AbstractTuple):
             self.w + other.w,
         )
 
+    @overload
+    def __sub__(self, other: AbstractTuple) -> Tuple: ...
+
+    @overload
+    def __sub__(self, other: AbstractTuple) -> AbstractTuple: ...
+
     def __sub__(self, other: AbstractTuple) -> AbstractTuple:
         if other.__class__.__name__ not in ["Point", "Vector"]:
             raise TypeError(

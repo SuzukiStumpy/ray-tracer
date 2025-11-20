@@ -58,6 +58,9 @@ class Vector(Tuple):
             self.x * other.y - self.y * other.x,
         )
 
+    def reflect(self, normal: Vector) -> Vector:
+        return cast(Vector, self - (normal * 2 * self.dot(normal)))
+
 
 # Hide the optional `w` parameter from runtime introspection (inspect.signature
 # and help()) by setting a custom Signature that shows only (x, y, z).

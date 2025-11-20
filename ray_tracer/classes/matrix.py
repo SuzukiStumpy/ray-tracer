@@ -4,6 +4,8 @@ import numpy as np
 from numpy.linalg import LinAlgError
 
 from ray_tracer.classes.base_tuple import Tuple
+from ray_tracer.classes.point import Point
+from ray_tracer.classes.vector import Vector
 from ray_tracer.constants import EPSILON
 
 
@@ -41,13 +43,20 @@ class Matrix:
 
         return np.allclose(self.data, other.data, atol=EPSILON)
 
-    def __mul__(self, other: object) -> Matrix | Tuple:
-        if isinstance(other, Tuple):
-            return Tuple(
+    def __mul__(self, other: object) -> Matrix | Tuple | Point | Vector:
+        if isinstance(other, (Tuple, Point, Vector)):
+            t = Tuple(
                 *np.matmul(self.data, np.array([other.x, other.y, other.z, other.w]))
             )
 
-        if isinstance(other, Matrix):
+            if isinstance(other, Point):
+                return Point(t.x, t.y, t.z)
+            elif isinstance(other, Vector):
+                return Vector(t.x, t.y, t.z)
+            else:
+                return t
+
+        elif isinstance(other, Matrix):
             return Matrix(np.matmul(self.data, other.data))
 
         raise NotImplementedError

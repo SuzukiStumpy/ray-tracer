@@ -8,6 +8,8 @@ from ray_tracer.classes.base_tuple import Tuple
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.vector import Vector
 
+root2 = math.sqrt(2)
+
 
 class TestTuples:
     @pytest.mark.parametrize(
@@ -189,3 +191,17 @@ class TestTuples:
 
         assert a.cross(b) == Vector(-1, 2, -1)
         assert b.cross(a) == -a.cross(b)
+
+    def test_reflecting_a_vector_approaching_at_45_degrees(self) -> None:
+        v = Vector(1, -1, 0)
+        n = Vector(0, 1, 0)
+        r = v.reflect(n)
+
+        assert r == Vector(1, 1, 0)
+
+    def test_reflecting_a_vector_off_a_slanted_surface(self) -> None:
+        v = Vector(0, -1, 0)
+        n = Vector(root2 / 2, root2 / 2, 0)
+        r = v.reflect(n)
+
+        assert r == Vector(1, 0, 0)
