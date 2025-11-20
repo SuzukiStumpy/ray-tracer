@@ -1,0 +1,99 @@
+import pytest
+
+from ray_tracer.classes.colour import Colour, Colours
+from ray_tracer.classes.computation import Computation
+from ray_tracer.classes.intersection import Intersection
+from ray_tracer.classes.material import Material
+from ray_tracer.classes.point import Point
+from ray_tracer.classes.ray import Ray
+from ray_tracer.classes.transforms import Transforms
+from ray_tracer.classes.vector import Vector
+from ray_tracer.lights.point_light import PointLight
+from ray_tracer.objects.sphere import Sphere
+from ray_tracer.world import World
+
+
+class TestWorld:
+    def test_creating_a_world(self) -> None:
+        world = World()
+
+        assert len(world.objects) == 0
+        assert len(world.lights) == 0
+
+    def test_the_default_world(self) -> None:
+        light = PointLight(Point(-10, 10, -10), Colours.WHITE)
+        s1 = Sphere()
+        s1.material = Material(Colour(0.8, 1.0, 0.6), diffuse=0.7, specular=0.2)
+
+        s2 = Sphere()
+        s2.transform = Transforms.scaling(0.5, 0.5, 0.5)
+
+        w = World(True)
+
+        assert light in w.lights
+        assert s1 in w.objects
+        assert s2 in w.objects
+
+    def test_intersecting_a_world_with_a_ray(self) -> None:
+        w = World(True)
+        r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
+
+        xs = w.intersect(r)
+
+        assert len(xs) == 4
+        assert xs[0].t == 4
+        assert xs[1].t == 4.5
+        assert xs[2].t == 5.5
+        assert xs[3].t == 6
+
+    def test_shading_an_intersection(self) -> None:
+        w = World(True)
+        r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
+        shape = w.objects[0]
+        i = Intersection(4, shape)
+
+        comps = Computation(i, r)
+        c = w.shade_hit(comps)
+
+        assert c == Colour(0.38066, 0.47583, 0.2855)
+
+    def test_shaading_an_intersection_from_the_inside(self) -> None:
+        w = World(True)
+        w.lights[0] = PointLight(Point(0, 0.25, 0), Colours.WHITE)
+        r = Ray(Point(0, 0, 0), Vector(0, 0, 1))
+        shape = w.objects[1]
+        i = Intersection(0.5, shape)
+
+        comps = Computation(i, r)
+        c = w.shade_hit(comps)
+
+        assert c == Colour(0.90498, 0.90498, 0.90498)
+
+    @pytest.mark.parametrize(
+        "ray,expected",
+        [
+            (Ray(Point(0, 0, -5), Vector(0, 1, 0)), Colours.BLACK),
+            (Ray(Point(0, 0, -5), Vector(0, 0, 1)), Colour(0.38066, 0.47583, 0.2855)),
+        ],
+        ids=[
+            "misses",
+            "hits",
+        ],
+    )
+    def test_the_colour_when_a_ray(self, ray: Ray, expected: Colour) -> None:
+        w = World(True)
+        r = ray
+
+        assert w.colour_at(r) == expected
+
+    def test_the_colour_with_an_intersection_behind_the_ray(self) -> None:
+        w = World(True)
+        outer = w.objects[0]
+        outer.material.ambient = 1
+
+        inner = w.objects[1]
+        inner.material.ambient = 1
+
+        r = Ray(Point(0, 0, 0.75), Vector(0, 0, -1))
+
+        assert inner.material.colour == w.colour_at(r)

@@ -1,3 +1,4 @@
+from ray_tracer.classes.computation import Computation
 from ray_tracer.classes.intersection import Intersection
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.ray import Ray
@@ -75,3 +76,37 @@ class TestIntersections:
         i = Intersection.hit(xs)
 
         assert i == i4
+
+    def test_precomputing_the_state_of_an_intersection(self) -> None:
+        r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
+        shape = Sphere()
+        i = Intersection(4, shape)
+
+        comps = Computation(i, r)
+
+        assert comps.t == i.t
+        assert comps.obj == i.obj
+        assert comps.point == Point(0, 0, -1)
+        assert comps.eyev == Vector(0, 0, -1)
+        assert comps.normalv == Vector(0, 0, -1)
+
+    def test_hit_when_an_intersection_is_on_the_outside(self) -> None:
+        r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
+        shape = Sphere()
+        i = Intersection(4, shape)
+
+        comps = Computation(i, r)
+
+        assert comps.inside is False
+
+    def test_hit_when_an_intersection_is_on_the_inside(self) -> None:
+        r = Ray(Point(0, 0, 0), Vector(0, 0, 1))
+        shape = Sphere()
+        i = Intersection(1, shape)
+
+        comps = Computation(i, r)
+
+        assert comps.point == Point(0, 0, 1)
+        assert comps.eyev == Vector(0, 0, -1)
+        assert comps.inside is True
+        assert comps.normalv == Vector(0, 0, -1)

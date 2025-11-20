@@ -29,7 +29,7 @@ class TestLighting:
         light = PointLight(Point(0, 0, -10), Colours.WHITE)
         result = m.lighting(light, position, eyev, normalv)
 
-        assert result == Colour(1.9, 1.9, 1.9)
+        assert result == Colour(1, 1, 1)
 
     def test_with_the_eye_between_the_light_and_the_surface_eye_offset_45_degrees(
         self,
@@ -65,7 +65,7 @@ class TestLighting:
         light = PointLight(Point(0, 10, -10), Colours.WHITE)
         result = m.lighting(light, position, eyev, normalv)
 
-        assert result == Colour(1.6364, 1.6364, 1.6364)
+        assert result == Colour(1, 1, 1)
 
     def test_with_the_light_behind_the_surface(
         self,

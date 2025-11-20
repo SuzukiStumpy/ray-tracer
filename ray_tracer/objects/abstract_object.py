@@ -12,6 +12,16 @@ class AbstractObject(ABC):
         self.transform = Matrix.Identity()
         self.material = Material()
 
+    def __eq__(self, other: object) -> bool:
+        ignore_keys = "id"
+
+        if isinstance(other, self.__class__):
+            return {k: v for k, v in self.__dict__.items() if k not in ignore_keys} == {
+                k: v for k, v in other.__dict__.items() if k not in ignore_keys
+            }
+        else:
+            return False
+
     def set_transform(self, m: Matrix) -> None:
         self.transform = m
 
