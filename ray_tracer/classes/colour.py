@@ -1,5 +1,7 @@
 from typing import Self, overload
 
+from ray_tracer.utils import clamp
+
 from .abstract_tuple import AbstractTuple
 
 
@@ -96,6 +98,13 @@ class Colour(AbstractTuple):
 
     def __truediv__(self, other: float) -> Self:
         raise NotImplementedError
+
+    def clamp(self) -> Self:
+        return Colour(
+            clamp(self.x, 0, 1),
+            clamp(self.y, 0, 1),
+            clamp(self.z, 0, 1),
+        )
 
 
 class Colours:

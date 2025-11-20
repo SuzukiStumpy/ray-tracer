@@ -1,5 +1,6 @@
+import math
 from dataclasses import dataclass, field
-from typing import Optional, cast
+from typing import cast
 
 from ray_tracer.classes.colour import Colour, Colours
 from ray_tracer.classes.point import Point
@@ -39,18 +40,18 @@ class Material:
             # compute the diffuse contribution
             diffuse = effective_colour * self.diffuse * light_dot_normal
 
-            # reflect dot eye represents the coside of the angle between the
+            # reflect dot eye represents the cosine of the angle between the
             # reflection vector and the eye vector.  A negative number means the
             # light reflects away from the eye
-            reflectv: Vector = -(lightv).reflect(normal_vector)
+            reflectv: Vector = -lightv.reflect(normal_vector)
             reflect_dot_eye: float = reflectv.dot(eye_vector)
 
             if reflect_dot_eye <= 0:
                 specular = Colours.BLACK
             else:
                 # compute the specular contribution
-                factor = reflect_dot_eye**self.shininess
+                factor = math.pow(reflect_dot_eye, self.shininess)
                 specular = light.intensity * self.specular * factor
 
         # combine the three contributions to get the final shading
-        return ambient + diffuse + specular
+        return (ambient + diffuse + specular).clamp()
