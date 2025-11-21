@@ -1,6 +1,9 @@
 import math
+from typing import cast
 
 from ray_tracer.classes.matrix import Matrix
+from ray_tracer.classes.point import Point
+from ray_tracer.classes.vector import Vector
 
 
 class Transforms:
@@ -61,3 +64,20 @@ class Transforms:
         m[2, 0] = zx
         m[2, 1] = zy
         return m
+
+    @staticmethod
+    def view(from_: Point, to: Point, up: Vector) -> Matrix:
+        forward = cast(Vector, (to - from_)).normalize()
+        left = forward.cross(up.normalize())
+        true_up = left.cross(forward)
+        orientation = Matrix(
+            [
+                [left.x, left.y, left.z, 0],
+                [true_up.x, true_up.y, true_up.z, 0],
+                [-forward.x, -forward.y, -forward.z, 0],
+                [0, 0, 0, 1],
+            ]
+        )
+        return cast(
+            Matrix, orientation * Transforms.translation(-from_.x, -from_.y, -from_.z)
+        )

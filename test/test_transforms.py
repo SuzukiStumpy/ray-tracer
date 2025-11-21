@@ -139,3 +139,39 @@ class TestTransformations:
             t: Matrix = c * b * a
 
             assert t * p == Point(15, 0, 7)
+
+    class TestViewTransform:
+        def test_the_transformation_for_the_default_orientation(self) -> None:
+            from_ = Point(0, 0, 0)
+            to = Point(0, 0, -1)
+            up = Vector(0, 1, 0)
+
+            assert Transforms.view(from_, to, up) == Matrix.Identity()
+
+        def test_a_view_transform_looking_in_positive_z_direction(self) -> None:
+            from_ = Point(0, 0, 0)
+            to = Point(0, 0, 1)
+            up = Vector(0, 1, 0)
+
+            assert Transforms.view(from_, to, up) == Transforms.scaling(-1, 1, -1)
+
+        def test_view_transform_moves_the_world(self) -> None:
+            from_ = Point(0, 0, 8)
+            to = Point(0, 0, 0)
+            up = Vector(0, 1, 0)
+
+            assert Transforms.view(from_, to, up) == Transforms.translation(0, 0, -8)
+
+        def test_an_arbitrary_view_transformation(self) -> None:
+            from_ = Point(1, 3, 2)
+            to = Point(4, -2, 8)
+            up = Vector(1, 1, 0)
+
+            assert Transforms.view(from_, to, up) == Matrix(
+                [
+                    [-0.50709, 0.50709, 0.67612, -2.36643],
+                    [0.76772, 0.60609, 0.12122, -2.82843],
+                    [-0.35857, 0.59761, -0.71714, 0.00000],
+                    [0.00000, 0.00000, 0.00000, 1.00000],
+                ]
+            )
