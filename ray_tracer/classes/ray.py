@@ -18,7 +18,7 @@ class Ray:
 
     def intersect(self, obj: AbstractObject) -> list[Intersection]:
         # Transform the ray by the inverse of the object's transformation matrix
-        r2 = self.transform(obj.transform.inverse())
+        r2 = self.transform(obj.inverse_transform)
 
         # the vector from the object's centre to the ray origin (the object
         # is always centered on the world origin)

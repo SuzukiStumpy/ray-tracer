@@ -14,7 +14,8 @@ class Camera:
         self.hsize = hsize
         self.vsize = vsize
         self.field_of_view = field_of_view
-        self.transform = Matrix.Identity()
+        self.__dict__["transform"] = Matrix.Identity()
+        self.__dict__["inverse_transform"] = self.__dict__["transform"].inverse()
 
         half_view = math.tan(self.field_of_view / 2)
         aspect = self.hsize / self.vsize
@@ -30,7 +31,7 @@ class Camera:
 
     def ray_for_pixel(self, px: int, py: int) -> Ray:
         # precompute the inverse of the transformation matrix
-        inv = self.transform.inverse()
+        inv = self.inverse_transform
 
         # the offset from the edge of the canvas to the pixel's centre
         xoffset = (px + 0.5) * self.pixel_size
@@ -58,3 +59,24 @@ class Camera:
                 image.set_pixel(x, y, colour)
 
         return image
+
+    @property
+    def transform(self) -> Matrix:
+        return self.__dict__["transform"]
+
+    @transform.setter
+    def transform(self, m: Matrix) -> None:
+        self.__dict__["transform"] = m
+        self.__dict__["inverse_transform"] = m.inverse()
+
+    @property
+    def inverse_transform(self) -> Matrix:
+        v = self.__dict__.get("inverse_transform")
+        if v is None:
+            v = self.__dict__["transform"].inverse()
+            self.__dict__["inverse_transform"] = v
+        return v
+
+    @inverse_transform.setter
+    def inverse_transform(self, m: Matrix) -> None:
+        self.__dict__["inverse_transform"] = m

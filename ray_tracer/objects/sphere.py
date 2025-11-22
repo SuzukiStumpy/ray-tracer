@@ -1,4 +1,4 @@
-from typing import cast
+from typing import cast, override
 
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.vector import Vector
@@ -9,11 +9,10 @@ class Sphere(AbstractObject):
     def __init__(self) -> None:
         super().__init__()
 
-    def normal_at(self, p: Point) -> Vector:
-        object_point: Point = cast(Point, self.transform.inverse() * p)
-        object_normal: Vector = cast(Vector, object_point - Point(0, 0, 0))
-        world_normal: Vector = cast(
-            Vector, self.transform.inverse().transpose() * object_normal
-        )
+    @override
+    def __normal_func(self, op: Point) -> Vector:
+        """op is the point in object space"""
+        return cast(Vector, op - Point(0, 0, 0))
 
-        return world_normal.normalize()
+    def normal_at(self, p: Point) -> Vector:
+        return super()._normal_at(p, self.__normal_func)
