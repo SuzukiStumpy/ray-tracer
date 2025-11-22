@@ -38,7 +38,7 @@ def run() -> None:
             Matrix,
             (
                 Transforms.translation(0, 0, 5)  # type: ignore
-                * Transforms.rotation_y(math.pi / 4)
+                * Transforms.rotation_y(-math.pi / 4)
                 * Transforms.rotation_x(math.pi / 2)
                 * Transforms.scaling(10, 0.01, 10)
             ),
