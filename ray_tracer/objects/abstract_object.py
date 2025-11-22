@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import Callable, cast
 
 from ray_tracer.classes.material import Material
@@ -83,7 +83,5 @@ class AbstractObject(ABC):
         # Return the normalised world normal
         return world_normal.normalize()
 
-    def __normal_func(self, op: Point) -> Vector:
-        """Abstract function which must be implemented by individual objects
-        to compute the actual normal vector"""
-        ...
+    @abstractmethod
+    def _normal_func(self, op: Point) -> Vector: ...

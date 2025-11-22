@@ -1,0 +1,14 @@
+"""Not intended to be a useful class, but primarily for testing base behaviour"""
+
+from ray_tracer.classes.point import Point
+from ray_tracer.classes.vector import Vector
+from ray_tracer.objects.abstract_object import AbstractObject
+
+
+class TestShape(AbstractObject):
+    def __init__(self) -> None:
+        super().__init__()
+
+    # Normal for a non-existant shape is simply a zero length vector
+    def _normal_func(self, op: Point) -> Vector:
+        return Vector(0, 0, 0)

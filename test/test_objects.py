@@ -2,6 +2,7 @@ import math
 
 import pytest
 
+from ray_tracer.classes.colour import Colours
 from ray_tracer.classes.material import Material
 from ray_tracer.classes.matrix import Matrix
 from ray_tracer.classes.point import Point
@@ -9,25 +10,40 @@ from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.transforms import Transforms
 from ray_tracer.classes.vector import Vector
 from ray_tracer.objects.sphere import Sphere
+from ray_tracer.objects.test_shape import TestShape
 
 root2 = math.sqrt(2)
 root3 = math.sqrt(3)
 
 
-class TestSphere:
-    def test_a_spheres_default_transformation(self) -> None:
-        s = Sphere()
+class TestShapes:
+    def test_the_default_transformation(self) -> None:
+        s = TestShape()
 
         assert s.transform == Matrix.Identity()
 
-    def test_changing_a_spheres_transformation(self) -> None:
-        s = Sphere()
-        t = Transforms.translation(2, 3, 4)
+    def test_assigning_a_transformation(self) -> None:
+        s = TestShape()
+        s.set_transform(Transforms.translation(2, 3, 4))
 
-        s.set_transform(t)
+        assert s.transform == Transforms.translation(2, 3, 4)
 
-        assert s.transform == t
+    def test_a_shape_has_a_default_material(self) -> None:
+        s = TestShape()
 
+        assert s.material == Material()
+
+    def test_a_shape_can_be_assigned_a_material(self) -> None:
+        s = TestShape()
+        m = Material(Colours.BLUE, ambient=1)
+        s.material = m
+
+        assert s.material == m
+        assert s.material.colour == Colours.BLUE
+        assert s.material.ambient == 1
+
+
+class TestSphere:
     def test_intersecting_a_scaled_sphere_with_a_ray(self) -> None:
         r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
         s = Sphere()
@@ -82,16 +98,3 @@ class TestSphere:
         n = s.normal_at(Point(0, root2 / 2, -root2 / 2))
 
         assert n == Vector(0, 0.97014, -0.24254)
-
-    def test_a_sphere_has_a_default_material(self) -> None:
-        s = Sphere()
-
-        assert s.material == Material()
-
-    def test_a_sphere_may_be_assigned_a_material(self) -> None:
-        s = Sphere()
-        m = Material()
-        m.ambient = 1
-        s.material = m
-
-        assert s.material == m

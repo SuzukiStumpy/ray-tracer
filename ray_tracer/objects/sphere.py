@@ -10,9 +10,9 @@ class Sphere(AbstractObject):
         super().__init__()
 
     @override
-    def __normal_func(self, op: Point) -> Vector:
+    def _normal_func(self, op: Point) -> Vector:
         """op is the point in object space"""
         return cast(Vector, op - Point(0, 0, 0))
 
     def normal_at(self, p: Point) -> Vector:
-        return super()._normal_at(p, self.__normal_func)
+        return super()._normal_at(p, self._normal_func)
