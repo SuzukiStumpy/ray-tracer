@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast
 
 from ray_tracer.classes.colour import Colour
 from ray_tracer.classes.matrix import Matrix
@@ -17,8 +17,14 @@ class AbstractPattern(ABC):
     @abstractmethod
     def colour_at(self, p: Point) -> Colour: ...
 
-    @abstractmethod
-    def colour_at_object(self, obj: "AbstractObject", p: Point) -> Colour: ...
+    def colour_at_object(self, obj: "AbstractObject", p: Point) -> Colour:
+        # Convert point to object space
+        object_point = cast(Point, obj.inverse_transform * p)
+
+        # Convert object point to pattern space
+        pattern_point = cast(Point, self.inverse_transform * object_point)
+
+        return self.colour_at(pattern_point)
 
     def set_transform(self, m: Matrix) -> None:
         self.transform = m
