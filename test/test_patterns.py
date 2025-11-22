@@ -71,3 +71,42 @@ class TestPatterns:
             assert pattern.colour_at(Point(-0.1, 0, 0)) == Colours.BLACK
             assert pattern.colour_at(Point(-1, 0, 0)) == Colours.BLACK
             assert pattern.colour_at(Point(-1.1, 0, 0)) == Colours.WHITE
+
+    class TestGradient:
+        def test_a_gradient_linearly_interpolates_between_colours(self) -> None:
+            pattern = Patterns.Gradient(Colours.WHITE, Colours.BLACK)
+
+            assert pattern.colour_at(Point(0.25, 0, 0)) == Colour(0.375, 0.375, 0.375)
+            assert pattern.colour_at(Point(0.5, 0, 0)) == Colour(0.25, 0.25, 0.25)
+            assert pattern.colour_at(Point(0.75, 0, 0)) == Colour(0.125, 0.125, 0.125)
+
+    class TestRings:
+        def test_a_ring_should_extend_in_both_x_and_z(self) -> None:
+            pattern = Patterns.Rings(Colours.WHITE, Colours.BLACK)
+
+            assert pattern.colour_at(Point(0, 0, 0)) == Colours.WHITE
+            assert pattern.colour_at(Point(1, 0, 0)) == Colours.BLACK
+            assert pattern.colour_at(Point(0, 0, 1)) == Colours.BLACK
+            assert pattern.colour_at(Point(0.708, 0, 0.708)) == Colours.BLACK
+
+    class TestCheckerboard:
+        def test_checkers_repeat_in_x(self) -> None:
+            pattern = Patterns.Checkerboard(Colours.WHITE, Colours.BLACK)
+
+            assert pattern.colour_at(Point(0, 0, 0)) == Colours.WHITE
+            assert pattern.colour_at(Point(0.99, 0, 0)) == Colours.WHITE
+            assert pattern.colour_at(Point(1.01, 0, 0)) == Colours.BLACK
+
+        def test_checkers_repeat_in_y(self) -> None:
+            pattern = Patterns.Checkerboard(Colours.WHITE, Colours.BLACK)
+
+            assert pattern.colour_at(Point(0, 0, 0)) == Colours.WHITE
+            assert pattern.colour_at(Point(0, 0.99, 0)) == Colours.WHITE
+            assert pattern.colour_at(Point(0, 1.01, 0)) == Colours.BLACK
+
+        def test_checkers_repeat_in_z(self) -> None:
+            pattern = Patterns.Checkerboard(Colours.WHITE, Colours.BLACK)
+
+            assert pattern.colour_at(Point(0, 0, 0)) == Colours.WHITE
+            assert pattern.colour_at(Point(0, 0, 0.99)) == Colours.WHITE
+            assert pattern.colour_at(Point(0, 0, 1.01)) == Colours.BLACK
