@@ -47,7 +47,7 @@ def run() -> None:
                 normal = hit.obj.normal_at(point)
                 eye = -r.direction
 
-                colour = hit.obj.material.lighting(light, point, eye, normal)
+                colour = hit.obj.material.lighting(Sphere(), light, point, eye, normal)
                 c.set_pixel(row, col, colour)
 
     c.to_image().show()

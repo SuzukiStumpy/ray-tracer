@@ -1,16 +1,21 @@
 import math
 from dataclasses import dataclass, field
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from ray_tracer.classes.colour import Colour, Colours
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.vector import Vector
 from ray_tracer.lights.light import Light
 
+if TYPE_CHECKING:
+    from ray_tracer.objects.abstract_object import AbstractObject
+
+from ray_tracer.patterns.abstract_pattern import AbstractPattern
+
 
 @dataclass
 class Material:
-    colour: Colour = field(default_factory=lambda: Colours.WHITE)
+    colour: Colour | AbstractPattern = field(default_factory=lambda: Colours.WHITE)
     ambient: float = 0.1
     diffuse: float = 0.9
     specular: float = 0.9
@@ -18,6 +23,7 @@ class Material:
 
     def lighting(
         self,
+        obj: "AbstractObject",
         light: Light,
         point: Point,
         eye_vector: Vector,
@@ -25,7 +31,12 @@ class Material:
         in_shadow: bool = False,
     ) -> Colour:
         # Combine the surface colour with the light's colour/intensity
-        effective_colour: Colour = self.colour * light.intensity
+        if isinstance(self.colour, AbstractPattern):
+            effective_colour: Colour = self.colour.colour_at_object(obj, point)
+        else:
+            effective_colour: Colour = self.colour
+
+        effective_colour *= light.intensity
 
         # find the direction to the light source
         lightv: Vector = cast(Vector, light.position - point).normalize()

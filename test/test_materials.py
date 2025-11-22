@@ -1,10 +1,12 @@
 import math
 
+import ray_tracer.patterns as Patterns
 from ray_tracer.classes.colour import Colour, Colours
 from ray_tracer.classes.material import Material
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.vector import Vector
 from ray_tracer.lights.point_light import PointLight
+from ray_tracer.objects.sphere import Sphere
 
 root2 = math.sqrt(2)
 
@@ -27,7 +29,7 @@ class TestLighting:
         eyev = Vector(0, 0, -1)
         normalv = Vector(0, 0, -1)
         light = PointLight(Point(0, 0, -10), Colours.WHITE)
-        result = m.lighting(light, position, eyev, normalv)
+        result = m.lighting(Sphere(), light, position, eyev, normalv)
 
         assert result == Colour(1, 1, 1)
 
@@ -39,7 +41,7 @@ class TestLighting:
         eyev = Vector(0, root2 / 2, -root2 / 2)
         normalv = Vector(0, 0, -1)
         light = PointLight(Point(0, 0, -10), Colours.WHITE)
-        result = m.lighting(light, position, eyev, normalv)
+        result = m.lighting(Sphere(), light, position, eyev, normalv)
 
         assert result == Colour(1.0, 1.0, 1.0)
 
@@ -51,7 +53,7 @@ class TestLighting:
         eyev = Vector(0, 0, -1)
         normalv = Vector(0, 0, -1)
         light = PointLight(Point(0, 10, -10), Colours.WHITE)
-        result = m.lighting(light, position, eyev, normalv)
+        result = m.lighting(Sphere(), light, position, eyev, normalv)
 
         assert result == Colour(0.7364, 0.7364, 0.7364)
 
@@ -63,7 +65,7 @@ class TestLighting:
         eyev = Vector(0, -root2 / 2, -root2 / 2)
         normalv = Vector(0, 0, -1)
         light = PointLight(Point(0, 10, -10), Colours.WHITE)
-        result = m.lighting(light, position, eyev, normalv)
+        result = m.lighting(Sphere(), light, position, eyev, normalv)
 
         assert result == Colour(1, 1, 1)
 
@@ -75,7 +77,7 @@ class TestLighting:
         eyev = Vector(0, 0, -1)
         normalv = Vector(0, 0, -1)
         light = PointLight(Point(0, 0, 10), Colours.WHITE)
-        result = m.lighting(light, position, eyev, normalv)
+        result = m.lighting(Sphere(), light, position, eyev, normalv)
 
         assert result == Colour(0.1, 0.1, 0.1)
 
@@ -87,6 +89,24 @@ class TestLighting:
         light = PointLight(Point(0, 0, -10), Colours.WHITE)
         in_shadow = True
 
-        result = m.lighting(light, position, eyev, normalv, in_shadow)
+        result = m.lighting(Sphere(), light, position, eyev, normalv, in_shadow)
 
         assert result == Colour(0.1, 0.1, 0.1)
+
+    def test_lighting_with_a_pattern_applied(self) -> None:
+        m = Material(
+            Patterns.Stripes(Colours.WHITE, Colours.BLACK),
+            ambient=1,
+            diffuse=0,
+            specular=0,
+        )
+        eyev = Vector(0, 0, -1)
+        normalv = Vector(0, 0, -1)
+        light = PointLight(Point(0, 0, -10), Colour(1, 1, 1))
+
+        assert m.lighting(
+            Sphere(), light, Point(0.9, 0, 0), eyev, normalv, False
+        ) == Colour(1, 1, 1)
+        assert m.lighting(
+            Sphere(), light, Point(1.1, 0, 0), eyev, normalv, False
+        ) == Colour(0, 0, 0)

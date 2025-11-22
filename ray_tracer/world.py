@@ -38,7 +38,7 @@ class World:
         shadowed = self.is_shadowed(comps.over_point)
 
         return comps.obj.material.lighting(
-            self.lights[0], comps.point, comps.eyev, comps.normalv, shadowed
+            comps.obj, self.lights[0], comps.point, comps.eyev, comps.normalv, shadowed
         )
 
     def colour_at(self, r: Ray) -> Colour:
