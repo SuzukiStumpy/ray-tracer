@@ -69,4 +69,4 @@ class TestCamera:
 
         image = c.render(w)
 
-        assert image.pixel_at(5, 5) == Colour(0.38066, 0.47583, 0.2855)
+        assert image.get_pixel(5, 5) == Colour(0.38066, 0.47583, 0.2855)

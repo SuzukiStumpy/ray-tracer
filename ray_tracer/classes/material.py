@@ -17,7 +17,12 @@ class Material:
     shininess: float = 200.0
 
     def lighting(
-        self, light: Light, point: Point, eye_vector: Vector, normal_vector: Vector
+        self,
+        light: Light,
+        point: Point,
+        eye_vector: Vector,
+        normal_vector: Vector,
+        in_shadow: bool = False,
     ) -> Colour:
         # Combine the surface colour with the light's colour/intensity
         effective_colour: Colour = self.colour * light.intensity
@@ -33,7 +38,7 @@ class Material:
         # the light is on the other side of the surface.
         light_dot_normal: float = lightv.dot(normal_vector)
 
-        if light_dot_normal < 0:
+        if light_dot_normal < 0 or in_shadow is True:
             diffuse: Colour = Colours.BLACK
             specular: Colour = Colours.BLACK
         else:
