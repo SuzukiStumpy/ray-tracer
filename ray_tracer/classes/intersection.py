@@ -1,14 +1,15 @@
 from dataclasses import dataclass
 from operator import attrgetter
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 
-from ray_tracer.objects.abstract_object import AbstractObject
+if TYPE_CHECKING:
+    from ray_tracer.objects.abstract_object import AbstractObject
 
 
 @dataclass
 class Intersection:
     t: float
-    obj: AbstractObject
+    obj: "AbstractObject"
 
     @staticmethod
     def hit(intersections: list[Intersection]) -> Optional[Intersection]:

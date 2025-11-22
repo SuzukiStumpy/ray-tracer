@@ -36,7 +36,7 @@ def run() -> None:
 
             r = Ray(ray_origin, cast(Vector, (position - ray_origin)).normalize())
 
-            xs = r.intersect(s)
+            xs = s.intersect(r)
 
             if Intersection.hit(xs):
                 c.set_pixel(row, col, pixel_colour)

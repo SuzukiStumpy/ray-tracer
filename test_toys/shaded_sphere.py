@@ -39,7 +39,7 @@ def run() -> None:
 
             r = Ray(ray_origin, cast(Vector, (position - ray_origin)).normalize())
 
-            xs = r.intersect(s)
+            xs = s.intersect(r)
             hit = Intersection.hit(xs)
 
             if hit:

@@ -30,7 +30,7 @@ class World:
 
     def intersect(self, ray: Ray) -> list[Intersection]:
         return sorted(
-            chain.from_iterable(ray.intersect(o) for o in self.objects),
+            chain.from_iterable(o.intersect(ray) for o in self.objects),
             key=lambda hit: hit.t,
         )
 

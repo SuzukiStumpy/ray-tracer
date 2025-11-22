@@ -1,9 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import Callable, cast
+from typing import cast
 
+from ray_tracer.classes.intersection import Intersection
 from ray_tracer.classes.material import Material
 from ray_tracer.classes.matrix import Matrix
 from ray_tracer.classes.point import Point
+from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.vector import Vector
 
 
@@ -57,25 +59,18 @@ class AbstractObject(ABC):
         ----------------------
         Client code should call .normal_at(point).
 
-        The objects themselves need to implement normal_at(p) as a simple call
-        to super()._normal_at(p, self.__normal_func)
-
-        Where they also implement __normal_func(self, point) -> Vector which
-        calculates the normal _in object space_.  The _normal_at function below
+        Specific objects should override _normal_func(self, point) -> Vector which
+        calculates the normal _in object space_.  The normal_at function below
         handles all the conversion to/from object space and normalises the resulting
         world space vector before returning.
-
-        Whilst the machinery here is a little complex, it saves the objects themselves
-        from having to implement all the boilerplate and should ensure consistency
-        in behaviour between different object types.
     """
 
-    def _normal_at(self, p: Point, f: Callable) -> Vector:
+    def normal_at(self, p: Point) -> Vector:
         # Convert point to object space
         object_point: Point = cast(Point, self.inverse_transform * p)
 
         # Compute the normal at the point in object space
-        object_normal = f(object_point)
+        object_normal = self._normal_func(object_point)
 
         # Convert the normal back to world space
         world_normal = cast(Vector, self.inverse_transform.transpose() * object_normal)
@@ -85,3 +80,11 @@ class AbstractObject(ABC):
 
     @abstractmethod
     def _normal_func(self, op: Point) -> Vector: ...
+
+    def intersect(self, ray: Ray) -> list[Intersection]:
+        # Convert ray to object space
+        local_ray = ray.transform(self.inverse_transform)
+        return self._local_intersect(local_ray)
+
+    @abstractmethod
+    def _local_intersect(self, ray: Ray) -> list[Intersection]: ...

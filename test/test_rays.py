@@ -27,7 +27,7 @@ class TestRays:
         r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
         s = Sphere()
 
-        xs = r.intersect(s)
+        xs = s.intersect(r)
 
         assert len(xs) == 2
         assert xs[0].t == 4.0
@@ -37,7 +37,7 @@ class TestRays:
         r = Ray(Point(0, 1, -5), Vector(0, 0, 1))
         s = Sphere()
 
-        xs = r.intersect(s)
+        xs = s.intersect(r)
 
         assert len(xs) == 2
         assert xs[0].t == 5.0
@@ -47,7 +47,7 @@ class TestRays:
         r = Ray(Point(0, 2, -5), Vector(0, 0, 1))
         s = Sphere()
 
-        xs = r.intersect(s)
+        xs = s.intersect(r)
 
         assert len(xs) == 0
 
@@ -55,7 +55,7 @@ class TestRays:
         r = Ray(Point(0, 0, 0), Vector(0, 0, 1))
         s = Sphere()
 
-        xs = r.intersect(s)
+        xs = s.intersect(r)
 
         assert len(xs) == 2
         assert xs[0].t == -1.0
@@ -65,7 +65,7 @@ class TestRays:
         r = Ray(Point(0, 0, 5), Vector(0, 0, 1))
         s = Sphere()
 
-        xs = r.intersect(s)
+        xs = s.intersect(r)
 
         assert len(xs) == 2
         assert xs[0].t == -6.0

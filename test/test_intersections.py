@@ -31,7 +31,7 @@ class TestIntersections:
         r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
         s = Sphere()
 
-        xs = r.intersect(s)
+        xs = s.intersect(r)
 
         assert len(xs) == 2
         assert xs[0].obj == s

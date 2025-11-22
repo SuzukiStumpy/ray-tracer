@@ -9,6 +9,7 @@ from ray_tracer.classes.point import Point
 from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.transforms import Transforms
 from ray_tracer.classes.vector import Vector
+from ray_tracer.objects.plane import Plane
 from ray_tracer.objects.sphere import Sphere
 from ray_tracer.objects.test_shape import TestShape
 
@@ -49,7 +50,7 @@ class TestSphere:
         s = Sphere()
 
         s.set_transform(Transforms.scaling(2, 2, 2))
-        xs = r.intersect(s)
+        xs = s.intersect(r)
 
         assert len(xs) == 2
         assert xs[0].t == 3
@@ -98,3 +99,48 @@ class TestSphere:
         n = s.normal_at(Point(0, root2 / 2, -root2 / 2))
 
         assert n == Vector(0, 0.97014, -0.24254)
+
+
+class TestPlane:
+    def test_normal_of_a_plane_is_constant_everywhere(self) -> None:
+        p = Plane()
+
+        assert p.normal_at(Point(0, 0, 0)) == Vector(0, 1, 0)
+        assert p.normal_at(Point(10, 0, -10)) == Vector(0, 1, 0)
+        assert p.normal_at(Point(-5, 0, 150)) == Vector(0, 1, 0)
+
+    @pytest.mark.parametrize(
+        "input_ray",
+        [
+            (Ray(Point(0, 10, 0), Vector(0, 0, 1))),
+            (Ray(Point(0, 0, 0), Vector(0, 0, 1))),
+        ],
+        ids=["a ray parallel to the plane", "a coplanar ray"],
+    )
+    def test_intersection_with_a_ray_parallel_to_the_plane(
+        self, input_ray: Ray
+    ) -> None:
+        p = Plane()
+        r = input_ray
+
+        xs = p.intersect(r)
+
+        assert len(xs) == 0
+
+    @pytest.mark.parametrize(
+        "input_ray",
+        [
+            (Ray(Point(0, 1, 0), Vector(0, -1, 0))),
+            (Ray(Point(0, -1, 0), Vector(0, 1, 0))),
+        ],
+        ids=["above", "below"],
+    )
+    def test_a_ray_intersecting_a_plane_from(self, input_ray: Ray) -> None:
+        p = Plane()
+        r = input_ray
+
+        xs = p.intersect(r)
+
+        assert len(xs) == 1
+        assert xs[0].t == 1
+        assert xs[0].obj == p
