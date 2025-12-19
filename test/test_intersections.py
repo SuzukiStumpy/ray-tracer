@@ -4,7 +4,8 @@ from ray_tracer.classes.point import Point
 from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.transforms import Transforms
 from ray_tracer.classes.vector import Vector
-from ray_tracer.constants import EPSILON
+from ray_tracer.constants import EPSILON, ROOT2
+from ray_tracer.objects.plane import Plane
 from ray_tracer.objects.sphere import Sphere
 
 
@@ -123,3 +124,12 @@ class TestIntersections:
 
         assert comps.over_point.z < -EPSILON / 2
         assert comps.point.z > comps.over_point.z
+
+    def test_precomputation_of_the_reflectv_vector(self) -> None:
+        shape = Plane()
+        r = Ray(Point(0, 1, -1), Vector(0, -ROOT2 / 2, ROOT2 / 2))
+        i = Intersection(ROOT2, shape)
+
+        comps = Computation(i, r)
+
+        assert comps.reflectv == Vector(0, ROOT2 / 2, ROOT2 / 2)

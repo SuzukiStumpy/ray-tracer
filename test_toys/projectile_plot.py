@@ -2,6 +2,8 @@
 Test program to exercise the point and vector objects.  Given a projectile (p - a point)
 with velocity (v - a vector) and wind (w - also a vector), track the projectile's
 position after each arbitrary unit of time (a tick) until it hits the ground.
+
+Except this version plots the values to an image canvas
 """
 
 from typing import cast

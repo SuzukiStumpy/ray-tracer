@@ -15,9 +15,10 @@ from ray_tracer.objects.sphere import Sphere
 class World:
     """Defines the default scene for populating"""
 
-    def __init__(self, default: bool = False) -> None:
+    def __init__(self, default: bool = False, max_recursion: int = 1) -> None:
         self.lights = []
         self.objects = []
+        self.max_recursion = max_recursion
 
         if default is True:
             self.lights = [PointLight(Point(-10, 10, -10), Colours.WHITE)]
@@ -34,21 +35,45 @@ class World:
             key=lambda hit: hit.t,
         )
 
-    def shade_hit(self, comps: Computation) -> Colour:
+    def shade_hit(self, comps: Computation, remaining: int | None = None) -> Colour:
+        if remaining is None:
+            remaining = self.max_recursion
+
         shadowed = self.is_shadowed(comps.over_point)
 
-        return comps.obj.material.lighting(
+        surface = comps.obj.material.lighting(
             comps.obj, self.lights[0], comps.point, comps.eyev, comps.normalv, shadowed
         )
 
-    def colour_at(self, r: Ray) -> Colour:
+        reflected = self.reflected_colour(comps, remaining)
+
+        return surface + reflected
+
+    def colour_at(self, r: Ray, remaining: int | None = None) -> Colour:
+        if remaining is None:
+            remaining = self.max_recursion
+
         xs = self.intersect(r)
 
         try:
             hit = next(x for x in xs if x.t >= 0)
-            return self.shade_hit(Computation(hit, r))
+            return self.shade_hit(Computation(hit, r), remaining)
         except StopIteration:
             return Colours.BLACK
+
+    def reflected_colour(
+        self, comps: Computation, remaining: int | None = None
+    ) -> Colour:
+        if remaining is None:
+            remaining = self.max_recursion
+
+        if comps.obj.material.reflective == 0.0 or remaining <= 0:
+            return Colours.BLACK
+
+        reflect_ray = Ray(comps.over_point, comps.reflectv)
+        colour = self.colour_at(reflect_ray, remaining - 1)
+
+        return colour * comps.obj.material.reflective
 
     def is_shadowed(self, p: Point) -> bool:
         v: Vector = self.lights[0].position - p

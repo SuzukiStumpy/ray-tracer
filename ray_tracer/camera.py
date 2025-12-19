@@ -56,7 +56,8 @@ class Camera:
             for x in range(self.hsize):
                 ray = self.ray_for_pixel(x, y)
                 colour = world.colour_at(ray)
-                image.set_pixel(x, y, colour)
+                # Clamp prevents the image from corrupting when colours go past white
+                image.set_pixel(x, y, colour.clamp())
 
         return image
 

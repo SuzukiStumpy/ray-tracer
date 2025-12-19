@@ -6,10 +6,8 @@ from ray_tracer.classes.matrix import Matrix
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.transforms import Transforms
 from ray_tracer.classes.vector import Vector
-from ray_tracer.constants import EPSILON
+from ray_tracer.constants import EPSILON, ROOT2
 from ray_tracer.world import World
-
-root2 = math.sqrt(2)
 
 
 class TestCamera:
@@ -57,7 +55,7 @@ class TestCamera:
         r = c.ray_for_pixel(100, 50)
 
         assert r.origin == Point(0, 2, -5)
-        assert r.direction == Vector(root2 / 2, 0, -root2 / 2)
+        assert r.direction == Vector(ROOT2 / 2, 0, -ROOT2 / 2)
 
     def test_rendering_the_world_with_a_camera(self) -> None:
         w = World(True)

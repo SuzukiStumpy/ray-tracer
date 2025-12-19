@@ -11,9 +11,6 @@ from ray_tracer.objects.sphere import Sphere
 from ray_tracer.patterns import Gradient
 from ray_tracer.world import World
 
-"""Same as the first test scene except the spheres for floor and walls have been
-   removed and replaced with a single planar floor"""
-
 
 def run() -> None:
     sphere = Sphere()

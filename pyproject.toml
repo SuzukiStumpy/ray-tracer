@@ -64,3 +64,6 @@ module-name = "ray_tracer"
 testpaths = [
     "test",
 ]
+norecursedirs = ["ray_tracer", ".venv", "**/__pycache__"]
+addopts = "--ignore=ray_tracer"
+

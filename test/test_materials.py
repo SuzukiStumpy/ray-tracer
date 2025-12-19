@@ -1,14 +1,11 @@
-import math
-
 import ray_tracer.patterns as Patterns
 from ray_tracer.classes.colour import Colour, Colours
 from ray_tracer.classes.material import Material
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.vector import Vector
+from ray_tracer.constants import ROOT2
 from ray_tracer.lights.point_light import PointLight
 from ray_tracer.objects.sphere import Sphere
-
-root2 = math.sqrt(2)
 
 
 class TestMaterials:
@@ -39,7 +36,7 @@ class TestLighting:
     ) -> None:
         m = Material()
         position = Point(0, 0, 0)
-        eyev = Vector(0, root2 / 2, -root2 / 2)
+        eyev = Vector(0, ROOT2 / 2, -ROOT2 / 2)
         normalv = Vector(0, 0, -1)
         light = PointLight(Point(0, 0, -10), Colours.WHITE)
         result = m.lighting(Sphere(), light, position, eyev, normalv)
@@ -63,7 +60,7 @@ class TestLighting:
     ) -> None:
         m = Material()
         position = Point(0, 0, 0)
-        eyev = Vector(0, -root2 / 2, -root2 / 2)
+        eyev = Vector(0, -ROOT2 / 2, -ROOT2 / 2)
         normalv = Vector(0, 0, -1)
         light = PointLight(Point(0, 10, -10), Colours.WHITE)
         result = m.lighting(Sphere(), light, position, eyev, normalv)

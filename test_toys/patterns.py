@@ -9,15 +9,11 @@ from ray_tracer.classes.matrix import Matrix
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.transforms import Transforms
 from ray_tracer.classes.vector import Vector
+from ray_tracer.constants import ROOT2
 from ray_tracer.lights.point_light import PointLight
 from ray_tracer.objects.plane import Plane
 from ray_tracer.objects.sphere import Sphere
 from ray_tracer.world import World
-
-"""Same as the first test scene except the spheres for floor and walls have been
-   removed and replaced with a single planar floor"""
-
-root2 = math.sqrt(2)
 
 
 def run() -> None:
@@ -37,7 +33,7 @@ def run() -> None:
         specular=0.3,
     )
     middle.material.colour.set_transform(  # type:ignore
-        Transforms.rotation_x(root2 / 3)  # type: ignore
+        Transforms.rotation_x(ROOT2 / 3)  # type: ignore
         * Transforms.rotation_z(1.2)
         * Transforms.scaling(0.3, 2, 0.75)
     )

@@ -1,3 +1,5 @@
+import math
+
 import pytest
 
 from ray_tracer.classes.colour import Colour, Colours
@@ -8,7 +10,9 @@ from ray_tracer.classes.point import Point
 from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.transforms import Transforms
 from ray_tracer.classes.vector import Vector
+from ray_tracer.constants import EPSILON, ROOT2
 from ray_tracer.lights.point_light import PointLight
+from ray_tracer.objects.plane import Plane
 from ray_tracer.objects.sphere import Sphere
 from ray_tracer.world import World
 
@@ -137,3 +141,90 @@ class TestWorld:
         comps = Computation(i, r)
 
         assert w.shade_hit(comps) == Colour(0.1, 0.1, 0.1)
+
+    def test_a_non_reflective_surface_reflects_black(self) -> None:
+        w = World(default=True)
+        r = Ray(Point(0, 0, 0), Vector(0, 0, 1))
+        shape = w.objects[1]
+        shape.material.ambient = 1.0
+        i = Intersection(1, shape)
+
+        comps = Computation(i, r)
+        colour = w.reflected_colour(comps)
+
+        assert colour == Colours.BLACK
+
+    def test_a_reflective_surface_reflects_the_correct_colour(self) -> None:
+        w = World(default=True)
+
+        shape = Plane()
+        shape.material.reflective = 0.5
+        shape.set_transform(Transforms.translation(0, -1, 0))
+
+        w.objects.extend([shape])
+
+        r = Ray(Point(0, 0, -3), Vector(0, -ROOT2 / 2, ROOT2 / 2))
+        i = Intersection(ROOT2, shape)
+
+        comps = Computation(i, r)
+        colour = w.reflected_colour(comps)
+
+        assert math.isclose(colour.r, 0.19033, abs_tol=EPSILON)
+        assert math.isclose(colour.g, 0.23791, abs_tol=EPSILON)
+        assert math.isclose(colour.b, 0.14274, abs_tol=EPSILON)
+
+    def test_shade_hit_incorporates_reflected_colour_into_output(self) -> None:
+        w = World(default=True)
+
+        shape = Plane()
+        shape.material.reflective = 0.5
+        shape.set_transform(Transforms.translation(0, -1, 0))
+
+        w.objects.extend([shape])
+
+        r = Ray(Point(0, 0, -3), Vector(0, -ROOT2 / 2, ROOT2 / 2))
+        i = Intersection(ROOT2, shape)
+
+        comps = Computation(i, r)
+        colour = w.shade_hit(comps)
+
+        assert math.isclose(colour.r, 0.87675, abs_tol=EPSILON)
+        assert math.isclose(colour.g, 0.92434, abs_tol=EPSILON)
+        assert math.isclose(colour.b, 0.82918, abs_tol=EPSILON)
+
+    def test_we_avoid_infinite_reflective_recursion(self) -> None:
+        w = World()
+        w.lights = [PointLight(Point(0, 0, 0), Colour(1, 1, 1))]
+        lower = Plane()
+        lower.material.reflective = 1.0
+        lower.set_transform(Transforms.translation(0, -1, 0))
+
+        upper = Plane()
+        upper.material.reflective = 1.0
+        upper.set_transform(Transforms.translation(0, 1, 0))
+
+        w.objects.extend([lower, upper])
+
+        r = Ray(Point(0, 0, 0), Vector(0, 1, 0))
+
+        try:
+            w.colour_at(r)
+        except Exception as e:
+            pytest.fail(f"colour_at threw exception {e}")
+
+    def test_the_reflected_colour_at_max_recursion_depth(self) -> None:
+        w = World(default=True)
+
+        shape = Plane()
+        shape.material.reflective = 0.5
+        shape.set_transform(Transforms.translation(0, -1, 0))
+
+        w.objects.extend([shape])
+
+        r = Ray(Point(0, 0, -3), Vector(0, -ROOT2 / 2, ROOT2 / 2))
+        i = Intersection(ROOT2, shape)
+
+        comps = Computation(i, r)
+        colour = w.reflected_colour(comps, 0)
+
+        assert colour == Colours.BLACK

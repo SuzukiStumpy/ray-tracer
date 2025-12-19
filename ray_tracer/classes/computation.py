@@ -19,6 +19,7 @@ class Computation:
     point: Point
     eyev: Vector
     normalv: Vector
+    reflectv: Vector
     inside: bool = False
 
     def __init__(self, intersection: Intersection, ray: Ray) -> None:
@@ -31,5 +32,7 @@ class Computation:
         if self.normalv.dot(self.eyev) < 0:
             self.inside = True
             self.normalv = -self.normalv
+
+        self.reflectv = ray.direction.reflect(self.normalv)
 
         self.over_point = cast(Point, self.point + self.normalv * EPSILON)

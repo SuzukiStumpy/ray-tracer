@@ -7,8 +7,7 @@ import ray_tracer.constants as const
 from ray_tracer.classes.base_tuple import Tuple
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.vector import Vector
-
-root2 = math.sqrt(2)
+from ray_tracer.constants import ROOT2
 
 
 class TestTuples:
@@ -201,7 +200,7 @@ class TestTuples:
 
     def test_reflecting_a_vector_off_a_slanted_surface(self) -> None:
         v = Vector(0, -1, 0)
-        n = Vector(root2 / 2, root2 / 2, 0)
+        n = Vector(ROOT2 / 2, ROOT2 / 2, 0)
         r = v.reflect(n)
 
         assert r == Vector(1, 0, 0)
