@@ -20,6 +20,7 @@ class TestMaterials:
         assert m.diffuse == 0.9
         assert m.specular == 0.9
         assert m.shininess == 200.0
+        assert m.reflective == 0.0
 
 
 class TestLighting:

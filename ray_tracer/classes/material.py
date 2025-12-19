@@ -20,6 +20,7 @@ class Material:
     diffuse: float = 0.9
     specular: float = 0.9
     shininess: float = 200.0
+    reflective: float = 0.0
 
     def lighting(
         self,
