@@ -1,7 +1,4 @@
-from sys import float_repr_style
-from typing import cast, override
-
-from PIL.GifImagePlugin import TYPE_CHECKING
+from typing import TYPE_CHECKING, cast, override
 
 from ray_tracer.classes.colour import Colour, Colours
 from ray_tracer.classes.point import Point
