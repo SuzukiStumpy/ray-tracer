@@ -1,3 +1,5 @@
+import math
+
 import pytest
 
 from ray_tracer.classes.computation import Computation
@@ -187,3 +189,36 @@ class TestIntersections:
 
         assert comps.under_point.z > EPSILON / 2
         assert comps.point.z < comps.under_point.z
+
+    def test_the_schlick_approximation_under_total_internal_reflection(self) -> None:
+        w = World()
+        w.objects = [Sphere.glass()]
+
+        r = Ray(Point(0, 0, ROOT2 / 2), Vector(0, 1, 0))
+        xs = w.intersect(r)
+        comps = Computation(xs[1], r, xs)
+        reflectance = comps.schlick()
+
+        assert reflectance == 1.0
+
+    def test_reflectance_is_small_with_a_perpendicular_view_angle(self) -> None:
+        w = World()
+        w.objects = [Sphere.glass()]
+
+        r = Ray(Point(0, 0, 0), Vector(0, 1, 0))
+        xs = w.intersect(r)
+        comps = Computation(xs[1], r, xs)
+        reflectance = comps.schlick()
+
+        assert math.isclose(reflectance, 0.04, abs_tol=EPSILON)
+
+    def test_reflectance_with_small_angle_and_n2_greater_than_n2(self) -> None:
+        w = World()
+        w.objects = [Sphere.glass()]
+
+        r = Ray(Point(0, 0.99, -2), Vector(0, 0, 1))
+        xs = w.intersect(r)
+        comps = Computation(xs[0], r, xs)
+        reflectance = comps.schlick()
+
+        assert math.isclose(reflectance, 0.48881, abs_tol=EPSILON)

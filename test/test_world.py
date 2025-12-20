@@ -291,10 +291,34 @@ class TestWorld:
 
         w.objects = [floor, ball]
 
-        r = Ray(Point(0, 0, -3), Vector(0, -ROOT2 / 2, ROOT2 / 2))  #
+        r = Ray(Point(0, 0, -3), Vector(0, -ROOT2 / 2, ROOT2 / 2))
         xs = w.intersect(r)
 
         comps = Computation(xs[0], r, xs)
         c = w.shade_hit(comps, 5)
 
         assert c == Colour(0.93642, 0.68642, 0.68642)
+
+    def test_shade_hit_works_with_reflective_transparent_materials(self) -> None:
+        w = World(default=True)
+
+        floor = Plane()
+        floor.material.reflective = 0.5
+        floor.material.transparency = 0.5
+        floor.material.refractive_index = 1.5
+        floor.set_transform(Transforms.translation(0, -1, 0))
+
+        ball = Sphere()
+        ball.material.colour = Colours.RED
+        ball.material.ambient = 0.5
+        ball.set_transform(Transforms.translation(0, -3.5, -0.5))
+
+        w.objects = [floor, ball]
+
+        r = Ray(Point(0, 0, -3), Vector(0, -ROOT2 / 2, ROOT2 / 2))
+        xs = w.intersect(r)
+
+        comps = Computation(xs[0], r, xs)
+        c = w.shade_hit(comps, 5)
+
+        assert c == Colour(0.92590, 0.68643, 0.68642)

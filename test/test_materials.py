@@ -20,6 +20,7 @@ class TestMaterials:
         assert m.reflective == 0.0
         assert m.transparency == 0.0
         assert m.refractive_index == 1.0
+        assert m.cast_shadows is True
 
 
 class TestLighting:

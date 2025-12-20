@@ -23,6 +23,7 @@ class Material:
     reflective: float = 0.0
     transparency: float = 0.0
     refractive_index: float = 1.0
+    cast_shadows: bool = True
 
     def lighting(
         self,

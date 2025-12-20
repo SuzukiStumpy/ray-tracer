@@ -44,12 +44,23 @@ class World:
         shadowed = self.is_shadowed(comps.over_point)
 
         surface = comps.obj.material.lighting(
-            comps.obj, self.lights[0], comps.point, comps.eyev, comps.normalv, shadowed
+            comps.obj,
+            self.lights[0],
+            comps.point,
+            comps.eyev,
+            comps.normalv,
+            shadowed,
         )
         reflected = self.reflected_colour(comps, remaining)
         refracted = self.refracted_colour(comps, remaining)
 
-        return surface + reflected + refracted
+        material = comps.obj.material
+
+        if material.reflective > 0.0 and material.transparency > 0.0:
+            reflectance = comps.schlick()
+            return surface + (reflected * reflectance) + (refracted * (1 - reflectance))
+        else:
+            return surface + reflected + refracted
 
     def colour_at(self, r: Ray, remaining: int | None = None) -> Colour:
         if remaining is None:
@@ -122,6 +133,10 @@ class World:
         xs = self.intersect(r)
 
         h = Intersection.hit(xs)
+
+        while h is not None and h.obj.material.cast_shadows is False:
+            xs.remove(h)
+            h = Intersection.hit(xs)
 
         # Have to cast to boolean here since h.t < distance returns a numpy
         # boolean.  so np.True_ rather than True.  Much time was wasted tracking

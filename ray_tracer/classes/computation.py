@@ -1,3 +1,4 @@
+import math
 from dataclasses import dataclass
 from typing import cast
 
@@ -67,3 +68,26 @@ class Computation:
                     1.0 if not containers else containers[-1].material.refractive_index
                 )
                 break
+
+    def schlick(self) -> float:
+        """Implementation of the Schlick approximation for the Fresnel effect"""
+
+        # Find the cosine of the angle between the eye and normal vectors
+        cos_ = self.eyev.dot(self.normalv)
+
+        # Total internal reflection can only occur if n1 > n2
+        if self.n1 > self.n2:
+            n = self.n1 / self.n2
+            sin2_t = n**2 * (1.0 - cos_**2)
+
+            if sin2_t > 1.0:
+                return 1.0
+
+            # Compute cosine of theta_t using trig identity
+            cos_t = math.sqrt(1.0 - sin2_t)
+
+            # When n1 > n2, us cos(theta_t) instead
+            cos_ = cos_t
+
+        r0 = ((self.n1 - self.n2) / (self.n1 + self.n2)) ** 2
+        return r0 + (1 - r0) * (1 - cos_) ** 5
