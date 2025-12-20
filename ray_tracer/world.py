@@ -1,4 +1,6 @@
+import math
 from itertools import chain
+from typing import cast
 
 from ray_tracer.classes.colour import Colour, Colours
 from ray_tracer.classes.computation import Computation
@@ -44,10 +46,10 @@ class World:
         surface = comps.obj.material.lighting(
             comps.obj, self.lights[0], comps.point, comps.eyev, comps.normalv, shadowed
         )
-
         reflected = self.reflected_colour(comps, remaining)
+        refracted = self.refracted_colour(comps, remaining)
 
-        return surface + reflected
+        return surface + reflected + refracted
 
     def colour_at(self, r: Ray, remaining: int | None = None) -> Colour:
         if remaining is None:
@@ -74,6 +76,42 @@ class World:
         colour = self.colour_at(reflect_ray, remaining - 1)
 
         return colour * comps.obj.material.reflective
+
+    def refracted_colour(
+        self, comps: Computation, remaining: int | None = None
+    ) -> Colour:
+        if remaining is None:
+            remaining = self.max_recursion
+
+        if comps.obj.material.transparency == 0 or remaining == 0:
+            return Colours.BLACK
+
+        # Snell's law for computation of total internal reflection.  If ray is
+        # internally reflected, then return Black
+        n_ratio = comps.n1 / comps.n2
+        cos_i = comps.eyev.dot(comps.normalv)
+        sin2_t = n_ratio**2 * (1 - cos_i**2)
+
+        if sin2_t > 1.0:
+            return Colours.BLACK
+
+        # Now, compute the actual refracted colour...
+        # Get cos_t via trigonometric identity
+        cos_t = math.sqrt(1.0 - sin2_t)
+
+        # Compute the direction of the refracted ray
+        direction = cast(
+            Vector, comps.normalv * (n_ratio * cos_i - cos_t) - comps.eyev * n_ratio
+        )
+
+        # Spawn the refracted ray
+        refract_ray = Ray(comps.under_point, direction)
+
+        # Find the colour of the refracted ray, making sure to multiply by the
+        # transparency value to account for any opacity and return it
+        return self.colour_at(refract_ray, remaining - 1) * (
+            comps.obj.material.transparency
+        )
 
     def is_shadowed(self, p: Point) -> bool:
         v: Vector = self.lights[0].position - p

@@ -11,29 +11,29 @@ from ray_tracer.classes.transforms import Transforms
 from ray_tracer.classes.vector import Vector
 from ray_tracer.constants import ROOT2, ROOT3
 from ray_tracer.objects.plane import Plane
-from ray_tracer.objects.shape_tester import ShapeTester
 from ray_tracer.objects.sphere import Sphere
+from ray_tracer.objects.test_shape import TestShape
 
 
-class ShapeTesters:
+class TestShapes:
     def test_the_default_transformation(self) -> None:
-        s = ShapeTester()
+        s = TestShape()
 
         assert s.transform == Matrix.Identity()
 
     def test_assigning_a_transformation(self) -> None:
-        s = ShapeTester()
+        s = TestShape()
         s.set_transform(Transforms.translation(2, 3, 4))
 
         assert s.transform == Transforms.translation(2, 3, 4)
 
     def test_a_shape_has_a_default_material(self) -> None:
-        s = ShapeTester()
+        s = TestShape()
 
         assert s.material == Material()
 
     def test_a_shape_can_be_assigned_a_material(self) -> None:
-        s = ShapeTester()
+        s = TestShape()
         m = Material(Colours.BLUE, ambient=1)
         s.material = m
 

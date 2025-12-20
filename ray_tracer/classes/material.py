@@ -21,6 +21,8 @@ class Material:
     specular: float = 0.9
     shininess: float = 200.0
     reflective: float = 0.0
+    transparency: float = 0.0
+    refractive_index: float = 1.0
 
     def lighting(
         self,

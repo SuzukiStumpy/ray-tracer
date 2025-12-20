@@ -37,3 +37,12 @@ class Sphere(AbstractObject):
             Intersection((-b - discriminant_root) / (2 * a), self),
             Intersection((-b + discriminant_root) / (2 * a), self),
         ]
+
+    @staticmethod
+    def glass() -> Sphere:
+        """Factory method which returns a new sphere with a glass-like material"""
+        s = Sphere()
+        s.material.transparency = 1.0
+        s.material.refractive_index = 1.5
+
+        return s

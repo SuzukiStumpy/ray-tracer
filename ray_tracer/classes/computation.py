@@ -17,14 +17,24 @@ class Computation:
     t: float
     obj: AbstractObject
     point: Point
+    over_point: Point
+    under_point: Point
     eyev: Vector
     normalv: Vector
     reflectv: Vector
     inside: bool = False
 
-    def __init__(self, intersection: Intersection, ray: Ray) -> None:
-        self.t = intersection.t
-        self.obj = intersection.obj
+    def __init__(
+        self, hit: Intersection, ray: Ray, xs: list[Intersection] | None = None
+    ) -> None:
+        """hit is the single intersection with the ray that we are computing for.
+        xs is the full list of intersections with all objects in the world for this
+        ray"""
+        if xs is None:
+            xs = [hit]
+
+        self.t = hit.t
+        self.obj = hit.obj
         self.point = ray.position(self.t)
         self.eyev = -ray.direction
         self.normalv = self.obj.normal_at(self.point)
@@ -36,3 +46,24 @@ class Computation:
         self.reflectv = ray.direction.reflect(self.normalv)
 
         self.over_point = cast(Point, self.point + self.normalv * EPSILON)
+        self.under_point = cast(Point, self.point - self.normalv * EPSILON)
+
+        # Compute for transparent/refractive surfaces
+        containers: list[AbstractObject] = []
+
+        for i in xs:
+            if i == hit:
+                self.n1 = (
+                    1.0 if not containers else containers[-1].material.refractive_index
+                )
+
+            if i.obj in containers:
+                containers.remove(i.obj)
+            else:
+                containers.append(i.obj)
+
+            if i == hit:
+                self.n2 = (
+                    1.0 if not containers else containers[-1].material.refractive_index
+                )
+                break

@@ -1,3 +1,5 @@
+import pytest
+
 from ray_tracer.classes.computation import Computation
 from ray_tracer.classes.intersection import Intersection
 from ray_tracer.classes.point import Point
@@ -7,6 +9,7 @@ from ray_tracer.classes.vector import Vector
 from ray_tracer.constants import EPSILON, ROOT2
 from ray_tracer.objects.plane import Plane
 from ray_tracer.objects.sphere import Sphere
+from ray_tracer.world import World
 
 
 class TestIntersections:
@@ -133,3 +136,54 @@ class TestIntersections:
         comps = Computation(i, r)
 
         assert comps.reflectv == Vector(0, ROOT2 / 2, ROOT2 / 2)
+
+    @pytest.mark.parametrize(
+        "index,n1,n2",
+        [
+            (0, 1.0, 1.5),
+            (1, 1.5, 2.0),
+            (2, 2.0, 2.5),
+            (3, 2.5, 2.5),
+            (4, 2.5, 1.5),
+            (5, 1.5, 1.0),
+        ],
+    )
+    def test_n1_and_n2_at_various_intersections_for_transparent_materials(
+        self, index: int, n1: float, n2: float
+    ) -> None:
+        a = Sphere.glass()
+        a.set_transform(Transforms.scaling(2, 2, 2))
+        a.material.refractive_index = 1.5
+
+        b = Sphere.glass()
+        b.set_transform(Transforms.translation(0, 0, -0.25))
+        b.material.refractive_index = 2.0
+
+        c = Sphere.glass()
+        c.set_transform(Transforms.translation(0, 0, 0.25))
+        c.material.refractive_index = 2.5
+
+        w = World()
+        w.objects = [a, b, c]
+
+        r = Ray(Point(0, 0, -4), Vector(0, 0, 1))
+        xs = w.intersect(r)
+        comps = Computation(xs[index], r, xs)
+
+        assert comps.n1 == n1
+        assert comps.n2 == n2
+
+    def test_the_under_point_is_offset_below_the_surface(self) -> None:
+        r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
+        s = Sphere.glass()
+        s.set_transform(Transforms.translation(0, 0, 1))
+
+        w = World()
+        w.objects = [s]
+
+        i = Intersection(5, s)
+        xs = w.intersect(r)
+        comps = Computation(i, r, xs)
+
+        assert comps.under_point.z > EPSILON / 2
+        assert comps.point.z < comps.under_point.z

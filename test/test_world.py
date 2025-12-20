@@ -14,6 +14,7 @@ from ray_tracer.constants import EPSILON, ROOT2
 from ray_tracer.lights.point_light import PointLight
 from ray_tracer.objects.plane import Plane
 from ray_tracer.objects.sphere import Sphere
+from ray_tracer.patterns.test_pattern import TestPattern
 from ray_tracer.world import World
 
 
@@ -228,3 +229,72 @@ class TestWorld:
         colour = w.reflected_colour(comps, 0)
 
         assert colour == Colours.BLACK
+
+    def test_the_refracted_colour_of_an_opaque_surface_is_black(self) -> None:
+        w = World(default=True)
+        r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
+        xs = w.intersect(r)
+        comps = Computation(xs[0], r, xs)
+        c = w.refracted_colour(comps, 5)
+
+        assert c == Colours.BLACK
+
+    def test_refracted_colour_at_max_recursion_is_black(self) -> None:
+        w = World(default=True)
+        w.objects[0] = Sphere.glass()
+        r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
+        xs = w.intersect(r)
+        comps = Computation(xs[0], r, xs)
+        c = w.refracted_colour(comps, 0)
+
+        assert c == Colours.BLACK
+
+    def test_refracted_colour_under_total_internal_reflection(self) -> None:
+        w = World(default=True)
+        w.objects[0] = Sphere.glass()
+        r = Ray(Point(0, 0, ROOT2 / 2), Vector(0, 1, 0))
+        xs = w.intersect(r)
+
+        # Use second intersection since we're starting from _inside_ the sphere
+        comps = Computation(xs[1], r, xs)
+        c = w.refracted_colour(comps, 5)
+
+        assert c == Colours.BLACK
+
+    def test_the_colour_of_a_regular_refracted_ray(self) -> None:
+        w = World(default=True)
+        w.objects[0].material = Material(TestPattern(), ambient=1.0)
+        w.objects[1].material = Material(
+            Colours.BLACK, transparency=1.0, refractive_index=1.5
+        )
+
+        r = Ray(Point(0, 0, 0.1), Vector(0, 1, 0))
+        xs = w.intersect(r)
+
+        comps = Computation(xs[2], r, xs)
+        c = w.refracted_colour(comps, 5)
+
+        assert c == Colour(0, 0.99888, 0.04722)
+
+    def test_shade_hit_works_with_transparent_materials(self) -> None:
+        w = World(default=True)
+
+        floor = Plane()
+        floor.material.transparency = 0.5
+        floor.material.refractive_index = 1.5
+        floor.set_transform(Transforms.translation(0, -1, 0))
+
+        ball = Sphere()
+        ball.material.colour = Colours.RED
+        ball.material.ambient = 0.5
+        ball.set_transform(Transforms.translation(0, -3.5, -0.5))
+
+        w.objects = [floor, ball]
+
+        r = Ray(Point(0, 0, -3), Vector(0, -ROOT2 / 2, ROOT2 / 2))  #
+        xs = w.intersect(r)
+
+        comps = Computation(xs[0], r, xs)
+        c = w.shade_hit(comps, 5)
+
+        assert c == Colour(0.93642, 0.68642, 0.68642)
