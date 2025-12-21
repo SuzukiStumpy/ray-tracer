@@ -9,7 +9,8 @@ from ray_tracer.classes.point import Point
 from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.transforms import Transforms
 from ray_tracer.classes.vector import Vector
-from ray_tracer.constants import ROOT2, ROOT3
+from ray_tracer.constants import EPSILON, ROOT2, ROOT3
+from ray_tracer.objects.cube import Cube
 from ray_tracer.objects.plane import Plane
 from ray_tracer.objects.sphere import Sphere
 from ray_tracer.objects.test_shape import TestShape
@@ -142,3 +143,76 @@ class TestPlane:
         assert len(xs) == 1
         assert xs[0].t == 1
         assert xs[0].obj == p
+
+
+class TestCube:
+    @pytest.mark.parametrize(
+        "origin,direction,t1,t2",
+        [
+            (Point(5, 0.5, 0), Vector(-1, 0, 0), 4.0, 6.0),
+            (Point(-5, 0.5, 0), Vector(1, 0, 0), 4.0, 6.0),
+            (Point(0.5, 5, 0), Vector(0, -1, 0), 4.0, 6.0),
+            (Point(0.5, -5, 0), Vector(0, 1, 0), 4.0, 6.0),
+            (Point(0.5, 0, 5), Vector(0, 0, -1), 4.0, 6.0),
+            (Point(0.5, 0, -5), Vector(0, 0, 1), 4.0, 6.0),
+            (Point(0, 0.5, 0), Vector(0, 0, 1), -1, 1),
+        ],
+        ids=[
+            "+x",
+            "-x",
+            "+y",
+            "-y",
+            "+z",
+            "-z",
+            "inside",
+        ],
+    )
+    def test_a_ray_intersects_a_cube(
+        self, origin: Point, direction: Vector, t1: float, t2: float
+    ) -> None:
+        c = Cube()
+        r = Ray(origin, direction)
+        xs = c._local_intersect(r)
+
+        assert len(xs) == 2
+        assert math.isclose(xs[0].t, t1, abs_tol=EPSILON)
+        assert math.isclose(xs[1].t, t2, abs_tol=EPSILON)
+
+    @pytest.mark.parametrize(
+        "origin,direction",
+        [
+            (Point(-2, 0, 0), Vector(0.2673, 0.5345, 0.8018)),
+            (Point(0, -2, 0), Vector(0.8018, 0.2673, 0.5345)),
+            (Point(0, 0, -2), Vector(0.5345, 0.8018, 0.2673)),
+            (Point(2, 0, 2), Vector(0, 0, -1)),
+            (Point(0, 2, 2), Vector(0, -1, 0)),
+            (Point(2, 2, 0), Vector(-1, 0, 0)),
+        ],
+    )
+    def test_a_ray_misses_a_cube(self, origin: Point, direction: Vector) -> None:
+        c = Cube()
+        r = Ray(origin, direction)
+        xs = c._local_intersect(r)
+
+        assert len(xs) == 0
+
+    @pytest.mark.parametrize(
+        "point,normal",
+        [
+            (Point(1, 0.5, -0.8), Vector(1, 0, 0)),
+            (Point(-1, -0.2, 0.9), Vector(-1, 0, 0)),
+            (Point(-0.4, 1, -0.1), Vector(0, 1, 0)),
+            (Point(0.3, -1, -0.7), Vector(0, -1, 0)),
+            (Point(-0.6, 0.3, 1), Vector(0, 0, 1)),
+            (Point(0.4, 0.4, -1), Vector(0, 0, -1)),
+            (Point(1, 1, 1), Vector(1, 0, 0)),
+            (Point(-1, -1, -1), Vector(-1, 0, 0)),
+        ],
+    )
+    def test_the_normal_on_the_surface_of_a_cube(
+        self, point: Point, normal: Vector
+    ) -> None:
+        c = Cube()
+        p = point
+
+        assert c.normal_at(p) == normal
