@@ -13,6 +13,7 @@ from ray_tracer.constants import EPSILON, ROOT2, ROOT3
 from ray_tracer.objects.cone import Cone
 from ray_tracer.objects.cube import Cube
 from ray_tracer.objects.cylinder import Cylinder
+from ray_tracer.objects.group import Group
 from ray_tracer.objects.plane import Plane
 from ray_tracer.objects.sphere import Sphere
 from ray_tracer.objects.test_shape import TestShape
@@ -43,6 +44,11 @@ class TestShapes:
         assert s.material == m
         assert s.material.colour == Colours.BLUE
         assert s.material.ambient == 1
+
+    def test_a_shape_has_a_parent_attribute(self) -> None:
+        s = TestShape()
+
+        assert s.parent is None
 
 
 class TestSphere:
@@ -403,3 +409,119 @@ class TestCones:
         c = Cone()
 
         assert c._normal_func(point) == normal
+
+
+class TestGroup:
+    def test_creation_of_a_new_group(self) -> None:
+        g = Group()
+
+        assert g.transform == Matrix.Identity()
+        assert len(g.children) == 0
+
+    def test_adding_a_child_to_a_group(self) -> None:
+        g = Group()
+        s = TestShape()
+
+        g.add_child(s)
+
+        assert len(g.children) == 1
+        assert s in g.children
+        assert s.parent == g
+
+    def test_intersecting_a_ray_with_an_empty_group(self) -> None:
+        g = Group()
+        r = Ray(Point(0, 0, 0), Vector(0, 0, 1))
+        xs = g._local_intersect(r)
+
+        assert len(xs) == 0
+
+    def test_intersecting_a_ray_with_a_nonempty_group(self) -> None:
+        g = Group()
+        s1 = Sphere()
+        s2 = Sphere()
+        s2.set_transform(Transforms.translation(0, 0, -3))
+        s3 = Sphere()
+        s3.set_transform(Transforms.translation(5, 0, 0))
+
+        g.add_child(s1)
+        g.add_child(s2)
+        g.add_child(s3)
+
+        r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
+        xs = g._local_intersect(r)
+
+        assert len(xs) == 4
+        assert xs[0].obj == s2
+        assert xs[1].obj == s2
+        assert xs[2].obj == s1
+        assert xs[3].obj == s1
+
+    def test_intersecting_a_transformed_group(self) -> None:
+        g = Group()
+        g.set_transform(Transforms.scaling(2, 2, 2))
+
+        s = Sphere()
+        s.set_transform(Transforms.translation(5, 0, 0))
+
+        g.add_child(s)
+
+        r = Ray(Point(10, 0, -10), Vector(0, 0, 1))
+        xs = g.intersect(r)
+
+        assert len(xs) == 2
+
+    def test_convert_a_point_from_world_to_object_space(self) -> None:
+        g1 = Group()
+        g1.set_transform(Transforms.rotation_y(math.pi / 2))
+
+        g2 = Group()
+        g2.set_transform(Transforms.scaling(2, 2, 2))
+
+        g1.add_child(g2)
+
+        s = Sphere()
+        s.set_transform(Transforms.translation(5, 0, 0))
+
+        g2.add_child(s)
+
+        p = s.world_to_object(Point(-2, 0, -10))
+
+        assert p == Point(0, 0, -1)
+
+    def test_converting_a_normal_from_object_to_world_space(self) -> None:
+        g1 = Group()
+        g1.set_transform(Transforms.rotation_y(math.pi / 2))
+
+        g2 = Group()
+        g2.set_transform(Transforms.scaling(1, 2, 3))
+        g1.add_child(g2)
+
+        s = Sphere()
+        s.set_transform(Transforms.translation(5, 0, 0))
+        g2.add_child(s)
+
+        n = s.normal_to_world(Vector(ROOT3 / 3, ROOT3 / 3, ROOT3 / 3))
+
+        assert math.isclose(n.x, 0.28571, abs_tol=EPSILON)
+        assert math.isclose(n.y, 0.42857, abs_tol=EPSILON)
+        assert math.isclose(n.z, -0.85714, abs_tol=EPSILON)
+
+    def test_finding_the_normal_on_a_child_object(self) -> None:
+        g1 = Group()
+        g1.set_transform(Transforms.rotation_y(math.pi / 2))
+
+        g2 = Group()
+        g2.set_transform(Transforms.scaling(1, 2, 3))
+
+        g1.add_child(g2)
+
+        s = Sphere()
+        s.set_transform(Transforms.translation(5, 0, 0))
+
+        g2.add_child(s)
+
+        n = s.normal_at(Point(1.7321, 1.1547, -5.5774))
+
+        assert math.isclose(n.x, 0.28571, abs_tol=EPSILON)
+        assert math.isclose(n.y, 0.42854, abs_tol=EPSILON)
+        assert math.isclose(n.z, -0.85716, abs_tol=EPSILON)

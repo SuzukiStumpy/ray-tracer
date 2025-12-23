@@ -19,7 +19,7 @@ class AbstractPattern(ABC):
 
     def colour_at_object(self, obj: "AbstractObject", p: Point) -> Colour:
         # Convert point to object space
-        object_point = cast(Point, obj.inverse_transform * p)
+        object_point = obj.world_to_object(p)
 
         # Convert object point to pattern space
         pattern_point = cast(Point, self.inverse_transform * object_point)

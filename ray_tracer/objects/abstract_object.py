@@ -1,5 +1,7 @@
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 from ray_tracer.classes.intersection import Intersection
 from ray_tracer.classes.material import Material
@@ -7,6 +9,9 @@ from ray_tracer.classes.matrix import Matrix
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.vector import Vector
+
+if TYPE_CHECKING:
+    from ray_tracer.objects.group import Group
 
 
 class AbstractObject(ABC):
@@ -16,6 +21,7 @@ class AbstractObject(ABC):
         self.__dict__["transform"] = Matrix.Identity()
         self.__dict__["inverse_transform"] = self.__dict__["transform"].inverse()
         self.material = Material()
+        self.parent: Group | None = None
 
     def __eq__(self, other: object) -> bool:
         ignore_keys = "id"
@@ -31,6 +37,9 @@ class AbstractObject(ABC):
         # Use the property to set the transform and update the cached inverse
         self.transform = m
         self.inverse_transform = m.inverse()
+
+    def set_parent(self, p: Group) -> None:
+        self.parent = p
 
     @property
     def transform(self) -> Matrix:
@@ -66,17 +75,9 @@ class AbstractObject(ABC):
     """
 
     def normal_at(self, p: Point) -> Vector:
-        # Convert point to object space
-        object_point: Point = cast(Point, self.inverse_transform * p)
-
-        # Compute the normal at the point in object space
-        object_normal = self._normal_func(object_point)
-
-        # Convert the normal back to world space
-        world_normal = cast(Vector, self.inverse_transform.transpose() * object_normal)
-
-        # Return the normalised world normal
-        return world_normal.normalize()
+        local_point = self.world_to_object(p)
+        local_normal = self._normal_func(local_point)
+        return self.normal_to_world(local_normal)
 
     @abstractmethod
     def _normal_func(self, op: Point) -> Vector: ...
@@ -88,3 +89,19 @@ class AbstractObject(ABC):
 
     @abstractmethod
     def _local_intersect(self, ray: Ray) -> list[Intersection]: ...
+
+    def world_to_object(self, point: Point) -> Point:
+        if self.parent:
+            point = self.parent.world_to_object(point)
+
+        return cast(Point, self.transform.inverse() * point)
+
+    def normal_to_world(self, normal: Vector) -> Vector:
+        normal = cast(Vector, self.transform.inverse().transpose() * normal)
+        normal.w = 0
+        normal = normal.normalize()
+
+        if self.parent:
+            normal = self.parent.normal_to_world(normal)
+
+        return normal
