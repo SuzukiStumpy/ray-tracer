@@ -11,6 +11,7 @@ from ray_tracer.classes.transforms import Transforms
 from ray_tracer.classes.vector import Vector
 from ray_tracer.constants import EPSILON, ROOT2, ROOT3
 from ray_tracer.objects.cube import Cube
+from ray_tracer.objects.cylinder import Cylinder
 from ray_tracer.objects.plane import Plane
 from ray_tracer.objects.sphere import Sphere
 from ray_tracer.objects.test_shape import TestShape
@@ -216,3 +217,125 @@ class TestCube:
         p = point
 
         assert c.normal_at(p) == normal
+
+
+class TestCylinder:
+    @pytest.mark.parametrize(
+        "origin,direction",
+        [
+            (Point(1, 0, 0), Vector(0, 1, 0)),
+            (Point(0, 0, 0), Vector(0, 1, 0)),
+            (Point(1, 0, -5), Vector(1, 1, 1)),
+        ],
+    )
+    def test_ray_misses_a_cylinder(self, origin: Point, direction: Vector) -> None:
+        c = Cylinder()
+        d = direction.normalize()
+        r = Ray(origin, d)
+        xs = c._local_intersect(r)
+
+        assert len(xs) == 0
+
+    @pytest.mark.parametrize(
+        "origin,direction,t0,t1",
+        [
+            (Point(1, 0, -5), Vector(0, 0, 1), 5, 5),
+            (Point(0, 0, -5), Vector(0, 0, 1), 4, 6),
+            (Point(0.5, 0, -5), Vector(0.1, 1, 1), 6.80798, 7.08872),
+        ],
+    )
+    def test_ray_hits_a_cylinder(
+        self, origin: Point, direction: Vector, t0: float, t1: float
+    ) -> None:
+        c = Cylinder()
+        d = direction.normalize()
+        r = Ray(origin, d)
+        xs = c._local_intersect(r)
+
+        assert len(xs) == 2
+        assert math.isclose(xs[0].t, t0, abs_tol=EPSILON)
+        assert math.isclose(xs[1].t, t1, abs_tol=EPSILON)
+
+    @pytest.mark.parametrize(
+        "point,normal",
+        [
+            (Point(1, 0, 0), Vector(1, 0, 0)),
+            (Point(0, 5, -1), Vector(0, 0, -1)),
+            (Point(0, -2, 1), Vector(0, 0, 1)),
+            (Point(-1, 1, 0), Vector(-1, 0, 0)),
+        ],
+    )
+    def test_normal_vector_of_a_cylinder(self, point: Point, normal: Vector) -> None:
+        c = Cylinder()
+
+        assert c.normal_at(point) == normal
+
+    def test_default_minimum_and_maximum_for_cylinders(self) -> None:
+        c = Cylinder()
+
+        assert c.min == -math.inf
+        assert c.max == math.inf
+
+    @pytest.mark.parametrize(
+        "point,direction,count",
+        [
+            (Point(0, 1.5, 0), Vector(0.1, 1, 0), 0),
+            (Point(0, 3, -5), Vector(0, 0, 1), 0),
+            (Point(0, 0, -5), Vector(0, 0, 1), 0),
+            (Point(0, 2, -5), Vector(0, 0, 1), 0),
+            (Point(0, 1, -5), Vector(0, 0, 1), 0),
+            (Point(0, 1.5, -2), Vector(0, 0, 1), 2),
+        ],
+    )
+    def test_intersecting_a_truncated_cylinder(
+        self,
+        point: Point,
+        direction: Vector,
+        count: int,
+    ) -> None:
+        c = Cylinder(1, 2)
+        r = Ray(point, direction.normalize())
+        xs = c._local_intersect(r)
+
+        assert len(xs) == count
+
+    def test_default_cylinder_is_uncapped(self) -> None:
+        c = Cylinder()
+
+        assert c.closed is False
+
+    @pytest.mark.parametrize(
+        "point,direction,count",
+        [
+            (Point(0, 3, 0), Vector(0, -1, 0), 2),
+            (Point(0, 3, -2), Vector(0, -1, 2), 2),
+            (Point(0, 4, -2), Vector(0, -1, 1), 2),  # corner case
+            (Point(0, 0, -2), Vector(0, 1, 2), 2),
+            (Point(0, -1, -2), Vector(0, 1, 1), 2),  # corner case
+        ],
+    )
+    def test_intersecting_a_cylinders_end_caps(
+        self, point: Point, direction: Vector, count: int
+    ) -> None:
+        c = Cylinder(1, 2, True)
+        r = Ray(point, direction.normalize())
+        xs = c._local_intersect(r)
+
+        assert len(xs) == count
+
+    @pytest.mark.parametrize(
+        "point,normal",
+        [
+            (Point(0, 1, 0), Vector(0, -1, 0)),
+            (Point(0.5, 1, 0), Vector(0, -1, 0)),
+            (Point(0, 1, 0.5), Vector(0, -1, 0)),
+            (Point(0, 2, 0), Vector(0, 1, 0)),
+            (Point(0.5, 2, 0), Vector(0, 1, 0)),
+            (Point(0, 2, 0.5), Vector(0, 1, 0)),
+        ],
+    )
+    def test_the_normal_vector_for_a_capped_cylinders_end_caps(
+        self, point: Point, normal: Vector
+    ) -> None:
+        c = Cylinder(1, 2, True)
+        assert c.normal_at(point) == normal
