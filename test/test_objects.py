@@ -10,6 +10,7 @@ from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.transforms import Transforms
 from ray_tracer.classes.vector import Vector
 from ray_tracer.constants import EPSILON, ROOT2, ROOT3
+from ray_tracer.objects.cone import Cone
 from ray_tracer.objects.cube import Cube
 from ray_tracer.objects.cylinder import Cylinder
 from ray_tracer.objects.plane import Plane
@@ -339,3 +340,66 @@ class TestCylinder:
     ) -> None:
         c = Cylinder(1, 2, True)
         assert c.normal_at(point) == normal
+
+
+class TestCones:
+    @pytest.mark.parametrize(
+        "origin,direction,t0,t1",
+        [
+            (Point(0, 0, -5), Vector(0, 0, 1), 5.0, 5.0),
+            (Point(0, 0, -5), Vector(1, 1, 1), 8.66025, 8.66025),
+            (Point(1, 1, -5), Vector(-0.5, -1, 1), 4.55006, 49.44994),
+        ],
+    )
+    def test_intersecting_a_cone_with_a_ray(
+        self, origin: Point, direction: Vector, t0: float, t1: float
+    ) -> None:
+        c = Cone()
+        r = Ray(origin, direction.normalize())
+
+        xs = c._local_intersect(r)
+
+        assert len(xs) == 2
+        assert math.isclose(xs[0].t, t0, abs_tol=EPSILON)
+        assert math.isclose(xs[1].t, t1, abs_tol=EPSILON)
+
+    def test_intersecting_a_cone_with_a_ray_parallel_to_one_of_its_halves(self) -> None:
+        c = Cone()
+        r = Ray(Point(0, 0, -1), Vector(0, 1, 1).normalize())
+        xs = c._local_intersect(r)
+
+        assert len(xs) == 1
+        assert math.isclose(xs[0].t, 0.35355, abs_tol=EPSILON)
+
+    @pytest.mark.parametrize(
+        "origin,direction,count",
+        [
+            (Point(0, 0, -5), Vector(0, 1, 0), 0),
+            (Point(0, 0, -0.25), Vector(0, 1, 1), 1),  # count was 2 as written
+            (Point(0, 0, -0.25), Vector(0, 1, 0), 4),
+        ],
+    )
+    def test_intersecting_a_cones_end_caps(
+        self, origin: Point, direction: Vector, count: int
+    ) -> None:
+        c = Cone(-0.5, 0.5, True)
+        r = Ray(origin, direction.normalize())
+
+        xs = c._local_intersect(r)
+
+        assert len(xs) == count
+
+    @pytest.mark.parametrize(
+        "point,normal",
+        [
+            (Point(0, 0, 0), Vector(0, 0, 0)),
+            (Point(1, 1, 1), Vector(1, -ROOT2, 1)),
+            (Point(-1, -1, 0), Vector(-1, 1, 0)),
+        ],
+    )
+    def test_computing_normal_vector_for_a_cone(
+        self, point: Point, normal: Vector
+    ) -> None:
+        c = Cone()
+
+        assert c._normal_func(point) == normal
