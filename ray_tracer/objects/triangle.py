@@ -18,6 +18,15 @@ class Triangle(AbstractObject):
         self.edges: list[Vector] = [cast(Vector, p2 - p1), cast(Vector, p3 - p1)]
         self.normal: Vector = self.edges[1].cross(self.edges[0]).normalize()
 
+        self.bounds = Bounds(
+            Point(
+                min(p1.x, p2.x, p3.x),
+                min(p1.y, p2.y, p3.y),
+                min(p1.z, p2.z, p3.z),
+            ),
+            Point(max(p1.x, p2.x, p3.x), max(p1.y, p2.y, p3.y), max(p1.z, p2.z, p3.z)),
+        )
+
     @override
     def _normal_func(self, op: Point) -> Vector:
         return self.normal

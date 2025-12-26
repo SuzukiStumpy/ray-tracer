@@ -53,6 +53,7 @@ class Camera:
         image = Canvas(self.hsize, self.vsize)
 
         for y in range(self.vsize):
+            print(f"Rendering row {y + 1} of {self.vsize}")
             for x in range(self.hsize):
                 ray = self.ray_for_pixel(x, y)
                 colour = world.colour_at(ray)
