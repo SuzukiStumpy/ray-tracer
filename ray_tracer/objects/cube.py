@@ -6,10 +6,14 @@ from ray_tracer.classes.point import Point
 from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.vector import Vector
 from ray_tracer.constants import EPSILON
-from ray_tracer.objects.abstract_object import AbstractObject
+from ray_tracer.objects.abstract_object import AbstractObject, Bounds
 
 
 class Cube(AbstractObject):
+    def __init__(self) -> None:
+        super().__init__()
+        self.bounds = Bounds(Point(-1, -1, -1), Point(1, 1, 1))
+
     @override
     def _normal_func(self, op: Point) -> Vector:
         maxc = max(abs(op.x), abs(op.y), abs(op.z))

@@ -6,7 +6,7 @@ from ray_tracer.classes.point import Point
 from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.vector import Vector
 from ray_tracer.constants import EPSILON
-from ray_tracer.objects.abstract_object import AbstractObject
+from ray_tracer.objects.abstract_object import AbstractObject, Bounds
 
 
 class Cylinder(AbstractObject):
@@ -22,6 +22,8 @@ class Cylinder(AbstractObject):
         self.__dict__["min"] = minimum
         self.__dict__["max"] = maximum
         self.closed = closed
+
+        self.bounds = Bounds(Point(-1, minimum, -1), Point(1, maximum, 1))
 
     @property
     def min(self) -> float:

@@ -4,7 +4,7 @@ from ray_tracer.classes.intersection import Intersection
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.vector import Vector
-from ray_tracer.objects.abstract_object import AbstractObject
+from ray_tracer.objects.abstract_object import AbstractObject, Bounds
 
 
 class TestShape(AbstractObject):
@@ -12,6 +12,7 @@ class TestShape(AbstractObject):
 
     def __init__(self) -> None:
         super().__init__()
+        self.bounds = Bounds(Point(-1, -1, -1), Point(1, 1, 1))
 
     # Normal for a non-existant shape is simply a zero length vector
     def _normal_func(self, op: Point) -> Vector:

@@ -1,6 +1,5 @@
-from __future__ import annotations
-
 from abc import ABC, abstractmethod
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, cast
 
 from ray_tracer.classes.intersection import Intersection
@@ -14,6 +13,12 @@ if TYPE_CHECKING:
     from ray_tracer.objects.group import Group
 
 
+@dataclass
+class Bounds:
+    low: Point
+    high: Point
+
+
 class AbstractObject(ABC):
     def __init__(self) -> None:
         self.id = id(self)
@@ -22,6 +27,14 @@ class AbstractObject(ABC):
         self.__dict__["inverse_transform"] = self.__dict__["transform"].inverse()
         self.material = Material()
         self.parent: Group | None = None
+
+    @property
+    def bounds(self) -> Bounds:
+        return self.__dict__["bounds"]
+
+    @bounds.setter
+    def bounds(self, bounds: Bounds) -> None:
+        self.__dict__["bounds"] = bounds
 
     def __eq__(self, other: object) -> bool:
         ignore_keys = "id"

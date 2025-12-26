@@ -6,7 +6,7 @@ from ray_tracer.classes.point import Point
 from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.vector import Vector
 from ray_tracer.constants import EPSILON
-from ray_tracer.objects.abstract_object import AbstractObject
+from ray_tracer.objects.abstract_object import AbstractObject, Bounds
 
 
 class Cone(AbstractObject):
@@ -22,6 +22,11 @@ class Cone(AbstractObject):
         self.__dict__["min"] = minimum
         self.__dict__["max"] = maximum
         self.closed = closed
+
+        self.bounds = Bounds(
+            Point(min(self.min, -self.max), self.min, min(self.min, -self.max)),
+            Point(max(-self.min, self.max), maximum, max(-self.min, self.max)),
+        )
 
     @property
     def min(self) -> float:

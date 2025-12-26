@@ -10,6 +10,7 @@ from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.transforms import Transforms
 from ray_tracer.classes.vector import Vector
 from ray_tracer.constants import EPSILON, ROOT2, ROOT3
+from ray_tracer.objects.abstract_object import Bounds
 from ray_tracer.objects.cone import Cone
 from ray_tracer.objects.cube import Cube
 from ray_tracer.objects.cylinder import Cylinder
@@ -49,6 +50,11 @@ class TestShapes:
         s = TestShape()
 
         assert s.parent is None
+
+    def test_a_shape_has_a_bounding_box(self) -> None:
+        s = TestShape()
+
+        assert s.bounds == Bounds(Point(-1, -1, -1), Point(1, 1, 1))
 
 
 class TestSphere:
@@ -107,6 +113,11 @@ class TestSphere:
 
         assert n == Vector(0, 0.97014, -0.24254)
 
+    def test_a_sphere_has_unit_cube_bounding_box(self) -> None:
+        s = Sphere()
+
+        assert s.bounds == Bounds(Point(-1, -1, -1), Point(1, 1, 1))
+
 
 class TestPlane:
     def test_normal_of_a_plane_is_constant_everywhere(self) -> None:
@@ -151,6 +162,13 @@ class TestPlane:
         assert len(xs) == 1
         assert xs[0].t == 1
         assert xs[0].obj == p
+
+    def test_a_planes_bounding_box_is_infinite_in_x_and_z_and_zero_in_y(self) -> None:
+        p = Plane()
+
+        assert p.bounds == Bounds(
+            Point(-math.inf, 0, -math.inf), Point(math.inf, 0, math.inf)
+        )
 
 
 class TestCube:
@@ -224,6 +242,11 @@ class TestCube:
         p = point
 
         assert c.normal_at(p) == normal
+
+    def test_a_cube_has_a_bounding_box(self) -> None:
+        c = Cube()
+
+        assert c.bounds == Bounds(Point(-1, -1, -1), Point(1, 1, 1))
 
 
 class TestCylinder:
@@ -347,6 +370,16 @@ class TestCylinder:
         c = Cylinder(1, 2, True)
         assert c.normal_at(point) == normal
 
+    def test_a_normal_cylinder_has_infinite_bounds(self) -> None:
+        c = Cylinder()
+
+        assert c.bounds == Bounds(Point(-1, -math.inf, -1), Point(1, math.inf, 1))
+
+    def test_a_truncated_cylinder_has_capped_bounds(self) -> None:
+        c = Cylinder(-5, 13, False)
+
+        assert c.bounds == Bounds(Point(-1, -5, -1), Point(1, 13, 1))
+
 
 class TestCones:
     @pytest.mark.parametrize(
@@ -409,6 +442,18 @@ class TestCones:
         c = Cone()
 
         assert c._normal_func(point) == normal
+
+    def test_conic_bounds_are_infinite_for_default_cone(self) -> None:
+        c = Cone()
+
+        assert c.bounds == Bounds(
+            Point(-math.inf, -math.inf, -math.inf), Point(math.inf, math.inf, math.inf)
+        )
+
+    def test_truncated_cone_bounds_track_largest_and_smallest_radius(self) -> None:
+        c = Cone(-5, 10, False)
+
+        assert c.bounds == Bounds(Point(-10, -5, -10), Point(10, 10, 10))
 
 
 class TestGroup:
@@ -525,3 +570,47 @@ class TestGroup:
         assert math.isclose(n.x, 0.28571, abs_tol=EPSILON)
         assert math.isclose(n.y, 0.42854, abs_tol=EPSILON)
         assert math.isclose(n.z, -0.85716, abs_tol=EPSILON)
+
+    def test_an_empty_group_has_a_point_bounding_box(self) -> None:
+        g = Group()
+
+        assert g.bounds == Bounds(Point(0, 0, 0), Point(0, 0, 0))
+
+    def test_a_group_bounding_box_uses_the_transformed_object_bounds(self) -> None:
+        g = Group()
+
+        s = Sphere()
+        s.set_transform(Transforms.scaling(2, 2, 2))
+
+        g.add_child(s)
+
+        assert g.bounds == Bounds(Point(-2, -2, -2), Point(2, 2, 2))
+
+    def test_group_bounding_box_contains_the_bounds_of_all_its_transformed_objects(
+        self,
+    ) -> None:
+        g = Group()
+
+        s1 = Sphere()
+        s1.set_transform(Transforms.translation(2, 2, 2))
+
+        c1 = Cube()
+        c1.set_transform(Transforms.rotation_x(math.pi / 4))
+
+        g.add_child(s1)
+        g.add_child(c1)
+
+        assert g.bounds == Bounds(Point(-1, -1.41421, -1.41421), Point(3, 3, 3))
+
+    def test_ray_hits_a_group_bounding_box(self) -> None:
+        g = Group()
+        s1 = Sphere()
+        s1.set_transform(Transforms.translation(0, 1.5, 0))
+
+        # r is defined so that it misses the sphere, but should hit the bounding box
+        r = Ray(Point(0, 0, 0), Vector(1, 1, 1))
+
+        g.add_child(s1)
+
+        assert len(s1.intersect(r)) == 0
+        assert g._bb_hit(r) is True
