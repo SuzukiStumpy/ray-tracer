@@ -18,6 +18,7 @@ from ray_tracer.objects.group import Group
 from ray_tracer.objects.plane import Plane
 from ray_tracer.objects.sphere import Sphere
 from ray_tracer.objects.test_shape import TestShape
+from ray_tracer.objects.triangle import Triangle
 
 
 class TestShapes:
@@ -614,3 +615,64 @@ class TestGroup:
 
         assert len(s1.intersect(r)) == 0
         assert g._bb_hit(r) is True
+
+
+class TestTriangle:
+    @staticmethod
+    def create_standard_triangle() -> Triangle:
+        return Triangle(Point(0, 1, 0), Point(-1, 0, 0), Point(1, 0, 0))
+
+    def test_construction_of_a_triangle(self) -> None:
+        p1 = Point(0, 1, 0)
+        p2 = Point(-1, 0, 0)
+        p3 = Point(1, 0, 0)
+
+        t = Triangle(p1, p2, p3)
+
+        assert t.verts[0] == p1
+        assert t.verts[1] == p2
+        assert t.verts[2] == p3
+        assert t.edges[0] == Vector(-1, -1, 0)
+        assert t.edges[1] == Vector(1, -1, 0)
+        assert t.normal == Vector(0, 0, -1)
+
+    def test_finding_the_normal_of_a_triangle(self) -> None:
+        t = TestTriangle.create_standard_triangle()
+
+        n1 = t._normal_func(Point(0, 0.5, 0))
+        n2 = t._normal_func(Point(-0.5, 0.75, 0))
+        n3 = t._normal_func(Point(0.5, 0.25, 0))
+
+        assert n1 == t.normal
+        assert n2 == t.normal
+        assert n3 == t.normal
+
+    def test_intersecting_a_ray_parallel_to_a_triangle(self) -> None:
+        t = TestTriangle.create_standard_triangle()
+        r = Ray(Point(0, -1, -2), Vector(0, 1, 0))
+        xs = t._local_intersect(r)
+
+        assert len(xs) == 0
+
+    @pytest.mark.parametrize(
+        "origin",
+        [
+            (Point(1, 1, -2)),
+            (Point(-1, 1, -2)),
+            (Point(0, -1, -2)),
+        ],
+    )
+    def test_a_ray_misses_a_triangle_at_each_edge(self, origin: Point) -> None:
+        t = TestTriangle.create_standard_triangle()
+        r = Ray(origin, Vector(0, 0, 1))
+        xs = t._local_intersect(r)
+
+        assert len(xs) == 0
+
+    def test_a_ray_strikes_a_triangle(self) -> None:
+        t = TestTriangle.create_standard_triangle()
+        r = Ray(Point(0, 0.5, -2), Vector(0, 0, 1))
+        xs = t._local_intersect(r)
+
+        assert len(xs) == 1
+        assert xs[0].t == 2
