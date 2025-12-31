@@ -29,13 +29,15 @@ class Loader:
     def obj_to_group(self) -> Group:
         """Return a single group object which contains all the face data from
         the loaded object file"""
-
         # Make a copy of the default group so we don't mutate it (note, we don't need
         # to use deep copy since we'll only be mutating the group itself)
         g = copy(self.default_group)
 
         for key in self.groups.keys():
             g.add_child(self.groups[key])
+
+        # For now, this isn't functioning...
+        g = g.optimize()
 
         return g
 

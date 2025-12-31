@@ -118,3 +118,40 @@ class AbstractObject(ABC):
             normal = self.parent.normal_to_world(normal)
 
         return normal
+
+    def is_in(self, bounds: Bounds, full_containment: bool = False) -> bool:
+        """Determines whether an object falls within a specific set of bounds
+        the full_containment flag allows us to determine whether the object must be
+        fully contained, or just partially contained (ie: just a two axes being
+        within the tested bounds)"""
+        in_bounds = [False, False, False]
+
+        if (
+            self.bounds.low.x >= bounds.low.x
+            and self.bounds.low.x <= bounds.high.x
+            and self.bounds.high.x <= bounds.high.x
+            and self.bounds.high.x >= bounds.low.x
+        ):
+            in_bounds[0] = True
+
+        if (
+            self.bounds.low.y >= bounds.low.y
+            and self.bounds.low.y <= bounds.high.y
+            and self.bounds.high.y <= bounds.high.y
+            and self.bounds.high.y >= bounds.low.y
+        ):
+            in_bounds[1] = True
+
+        if (
+            self.bounds.low.z >= bounds.low.z
+            and self.bounds.low.z <= bounds.high.z
+            and self.bounds.high.z <= bounds.high.z
+            and self.bounds.high.z >= bounds.low.z
+        ):
+            in_bounds[2] = True
+
+        return (
+            in_bounds.count(True) > 2
+            if full_containment is False
+            else in_bounds.count(True) == 3
+        )

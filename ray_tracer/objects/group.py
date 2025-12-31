@@ -8,6 +8,12 @@ from ray_tracer.classes.vector import Vector
 from ray_tracer.constants import EPSILON
 from ray_tracer.objects.abstract_object import AbstractObject, Bounds
 
+# The most number of objects we can have directly in a group.
+MAX_CHILDREN = 100
+
+# Maximum recursion depth we'll drop to for the purposes of optimization
+MAX_DEPTH = 20
+
 
 class Group(AbstractObject):
     @override
@@ -111,3 +117,70 @@ class Group(AbstractObject):
                     max(max_z, self.bounds.high.z),
                 ),
             )
+
+    def optimize(self, _depth: int = MAX_DEPTH) -> Group:
+        """Optimizes the current group to ensure that we can render objects in a
+        reasonable length of time.  We do this by limiting the number of objects
+        within a group to MAX_CHILDREN and if this is overstepped, then we separate
+        the group into two sub-groups along the longest axis"""
+
+        # Bail if we've gone too far down the rabbit hole...
+        if _depth <= 0:
+            return self
+
+        # If we don't have too many children, just optimize any child groups
+        if len(self.children) <= MAX_CHILDREN:
+            for i, child in enumerate(self.children):
+                if isinstance(child, Group):
+                    self.children[i] = child.optimize(_depth - 1)
+            return self
+
+        # First, get the largest dimension
+        xlen = self.bounds.high.x - self.bounds.low.x
+        ylen = self.bounds.high.y - self.bounds.low.y
+        zlen = self.bounds.high.z - self.bounds.low.z
+
+        max_len = max(xlen, ylen, zlen)
+        split_axis = "x" if xlen == max_len else "y" if ylen == max_len else "z"
+
+        # Initialise test bounds so that the linter is satisfied...
+        test_bounds = Bounds(Point(0, 0, 0), Point(0, 0, 0))
+
+        match split_axis:
+            case "x":
+                mid = (self.bounds.low.x + self.bounds.high.x) / 2
+                test_bounds = Bounds(
+                    self.bounds.low, Point(mid, self.bounds.high.y, self.bounds.high.z)
+                )
+
+            case "y":
+                mid = (self.bounds.low.y + self.bounds.high.y) / 2
+                test_bounds = Bounds(
+                    self.bounds.low, Point(self.bounds.high.x, mid, self.bounds.high.z)
+                )
+
+            case "z":
+                mid = (self.bounds.low.z + self.bounds.high.z) / 2
+                test_bounds = Bounds(
+                    self.bounds.low, Point(self.bounds.high.x, self.bounds.high.y, mid)
+                )
+
+        low_group = Group()
+        high_group = Group()
+
+        # Split all children into correct sub-groups
+        for child in self.children:
+            if child.is_in(test_bounds, full_containment=False):
+                low_group.add_child(child)
+            else:
+                high_group.add_child(child)
+
+        low_group = low_group.optimize(_depth - 1)
+        high_group = high_group.optimize(_depth - 1)
+
+        g = Group()
+
+        g.add_child(low_group)
+        g.add_child(high_group)
+
+        return g

@@ -1,4 +1,5 @@
 import math
+import time
 from typing import cast
 
 from ray_tracer.classes.canvas import Canvas
@@ -52,13 +53,31 @@ class Camera:
     def render(self, world: World) -> Canvas:
         image = Canvas(self.hsize, self.vsize)
 
+        image_start = time.perf_counter()
+
         for y in range(self.vsize):
-            print(f"Rendering row {y + 1} of {self.vsize}")
+            print(
+                " " * (79), end="\r", flush=True
+            )  # Print a blank row to erase any previous output...
+            print(f"Rendering row {y + 1} of {self.vsize}", end="", flush=True)
+            start = time.perf_counter()
+
             for x in range(self.hsize):
                 ray = self.ray_for_pixel(x, y)
                 colour = world.colour_at(ray)
                 # Clamp prevents the image from corrupting when colours go past white
                 image.set_pixel(x, y, colour.clamp())
+
+            end = time.perf_counter()
+            print(
+                f" : row {y + 1} rendered in {(end - start):.2f}s", end="", flush=True
+            )
+
+        image_end = time.perf_counter()
+        elapsed_seconds = image_end - image_start
+        elapsed_minutes = int(elapsed_seconds / 60)
+        remaining_seconds = elapsed_seconds - (elapsed_minutes * 60)
+        print(f"\nImage rendered in {elapsed_minutes}m {remaining_seconds:.2f}s")
 
         return image
 

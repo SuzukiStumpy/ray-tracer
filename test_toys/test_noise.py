@@ -1,7 +1,7 @@
 import math
 
 from ray_tracer.camera import Camera
-from ray_tracer.classes.colour import Colour, Colours
+from ray_tracer.classes.colour import Colours
 from ray_tracer.classes.material import Material
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.transforms import Transforms
@@ -9,7 +9,7 @@ from ray_tracer.classes.vector import Vector
 from ray_tracer.lights.point_light import PointLight
 from ray_tracer.objects.plane import Plane
 from ray_tracer.objects.sphere import Sphere
-from ray_tracer.patterns import Gradient, Noise, Stripes
+from ray_tracer.patterns import Noise, Stripes
 from ray_tracer.world import World
 
 
