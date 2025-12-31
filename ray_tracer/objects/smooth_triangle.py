@@ -9,14 +9,15 @@ from ray_tracer.constants import EPSILON
 from ray_tracer.objects.abstract_object import AbstractObject, Bounds
 
 
-class Triangle(AbstractObject):
-    @override
-    def __init__(self, p1: Point, p2: Point, p3: Point) -> None:
+class SmoothTriangle(AbstractObject):
+    def __init__(
+        self, p1: Point, p2: Point, p3: Point, n1: Vector, n2: Vector, n3: Vector
+    ) -> None:
         super().__init__()
 
-        self.verts: list[Point] = [p1, p2, p3]
+        self.verts = [p1, p2, p3]
         self.edges: list[Vector] = [cast(Vector, p2 - p1), cast(Vector, p3 - p1)]
-        self.normal: Vector = self.edges[1].cross(self.edges[0]).normalize()
+        self.normals = [n1, n2, n3]
 
         self.bounds = Bounds(
             Point(
@@ -24,12 +25,12 @@ class Triangle(AbstractObject):
                 min(p1.y, p2.y, p3.y),
                 min(p1.z, p2.z, p3.z),
             ),
-            Point(max(p1.x, p2.x, p3.x), max(p1.y, p2.y, p3.y), max(p1.z, p2.z, p3.z)),
+            Point(
+                max(p1.x, p2.x, p3.x),
+                max(p1.y, p2.y, p3.y),
+                max(p1.z, p2.z, p3.z),
+            ),
         )
-
-    @override
-    def _normal_func(self, op: Point, i: Intersection | None = None) -> Vector:
-        return self.normal
 
     @override
     def _local_intersect(self, ray: Ray) -> list[Intersection]:
@@ -57,4 +58,22 @@ class Triangle(AbstractObject):
 
         t = f * self.edges[1].dot(origin_cross_e1)
 
-        return [Intersection(t, self)]
+        return [Intersection(t, self, u, v)]
+
+    def _normal_func(self, op: Point, i: Intersection | None = None) -> Vector:
+        if i is None:
+            raise ValueError(
+                "Smooth triangle _normal_func requires the passing of an intersection"
+            )
+
+        if i.u is None or i.v is None:
+            raise ValueError(
+                "Invalid intersection object passed to _normal_func in SmoothTriangle"
+            )
+
+        return cast(
+            Vector,
+            self.normals[1] * i.u
+            + self.normals[2] * i.v
+            + self.normals[0] * (1 - i.u - i.v),
+        )

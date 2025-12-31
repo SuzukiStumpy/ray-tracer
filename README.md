@@ -14,7 +14,7 @@ is used as the package manager.
   * Cylinder
   * Plane
   * Sphere
-  * Triangle
+  * Triangle (faceted _and_ smoothed)
 
 * Groups of objects with common transformations - allows for complex objects to be 
 constructed from primitives
@@ -27,6 +27,12 @@ the following images exhibit a 100x improvement in render time over using the un
   <img src="./static_files/cow-no-normals.png" alt="Low resolution rendering of a cow" width="32%" style="margin: 5px;" />
   <img src="./static_files/utah-teapot.png" alt="Low resolution rendering of the Utah teapot" width="32%" style="margin: 5px;" />
   <img src="./static_files/teddy-bear.png" alt="Low resolution rendering of a teddy bear (from the rear)" width="32%" style="margin: 5px;" />
+</p>
+
+The astronaut below consists of 6381 triangle faces.  This 300x500 image rendered in 17m 41s
+
+<p style="text-align: center;">
+  <img src="./static_files/astronaut.png" alt="Smoothed mesh of an astronaut" width="32%" style="margin:5px;" />
 </p>
 
 * Basic materials including the following 3D patterns:
@@ -47,7 +53,7 @@ the following images exhibit a 100x improvement in render time over using the un
 
 
 ## To-Do:
-* Normal smoothing for meshes
+* ~~Normal smoothing for meshes~~  DONE
 
 * Add different light types (area lights, spotlights, directional lights); with realistic falloff.
 

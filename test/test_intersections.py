@@ -11,6 +11,7 @@ from ray_tracer.classes.vector import Vector
 from ray_tracer.constants import EPSILON, ROOT2
 from ray_tracer.objects.plane import Plane
 from ray_tracer.objects.sphere import Sphere
+from ray_tracer.objects.triangle import Triangle
 from ray_tracer.world import World
 
 
@@ -222,3 +223,10 @@ class TestIntersections:
         reflectance = comps.schlick()
 
         assert math.isclose(reflectance, 0.48881, abs_tol=EPSILON)
+
+    def test_intersections_have_u_and_v_properties(self) -> None:
+        s = Triangle(Point(0, 1, 0), Point(-1, 0, 0), Point(1, 0, 0))
+        i = Intersection(3.5, s, 0.2, 0.4)
+
+        assert i.u == 0.2
+        assert i.v == 0.4

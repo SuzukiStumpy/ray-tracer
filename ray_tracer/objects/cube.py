@@ -15,7 +15,7 @@ class Cube(AbstractObject):
         self.bounds = Bounds(Point(-1, -1, -1), Point(1, 1, 1))
 
     @override
-    def _normal_func(self, op: Point) -> Vector:
+    def _normal_func(self, op: Point, i: Intersection | None = None) -> Vector:
         maxc = max(abs(op.x), abs(op.y), abs(op.z))
 
         if maxc == abs(op.x):

@@ -37,7 +37,7 @@ class AbstractObject(ABC):
         self.__dict__["bounds"] = bounds
 
     def __eq__(self, other: object) -> bool:
-        ignore_keys = "id"
+        ignore_keys = {"id", "parent", "children"}
 
         if isinstance(other, self.__class__):
             return {k: v for k, v in self.__dict__.items() if k not in ignore_keys} == {
@@ -87,13 +87,13 @@ class AbstractObject(ABC):
         world space vector before returning.
     """
 
-    def normal_at(self, p: Point) -> Vector:
+    def normal_at(self, p: Point, i: Intersection | None = None) -> Vector:
         local_point = self.world_to_object(p)
-        local_normal = self._normal_func(local_point)
+        local_normal = self._normal_func(local_point, i)
         return self.normal_to_world(local_normal)
 
     @abstractmethod
-    def _normal_func(self, op: Point) -> Vector: ...
+    def _normal_func(self, op: Point, i: Intersection | None = None) -> Vector: ...
 
     def intersect(self, ray: Ray) -> list[Intersection]:
         # Convert ray to object space

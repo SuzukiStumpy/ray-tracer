@@ -3,6 +3,8 @@ import math
 import pytest
 
 from ray_tracer.classes.colour import Colours
+from ray_tracer.classes.computation import Computation
+from ray_tracer.classes.intersection import Intersection
 from ray_tracer.classes.material import Material
 from ray_tracer.classes.matrix import Matrix
 from ray_tracer.classes.point import Point
@@ -16,6 +18,7 @@ from ray_tracer.objects.cube import Cube
 from ray_tracer.objects.cylinder import Cylinder
 from ray_tracer.objects.group import Group
 from ray_tracer.objects.plane import Plane
+from ray_tracer.objects.smooth_triangle import SmoothTriangle
 from ray_tracer.objects.sphere import Sphere
 from ray_tracer.objects.test_shape import TestShape
 from ray_tracer.objects.triangle import Triangle
@@ -676,3 +679,49 @@ class TestTriangle:
 
         assert len(xs) == 1
         assert xs[0].t == 2
+
+
+class TestSmoothTriangle:
+    def create_standard_triangle(self) -> None:
+        return SmoothTriangle(
+            Point(0, 1, 0),
+            Point(-1, 0, 0),
+            Point(1, 0, 0),
+            Vector(0, 1, 0),
+            Vector(-1, 0, 0),
+            Vector(1, 0, 0),
+        )
+
+    def test_constructing_a_smmoth_triangle(self) -> None:
+        tri = self.create_standard_triangle()
+
+        assert tri.verts[0] == Point(0, 1, 0)
+        assert tri.verts[1] == Point(-1, 0, 0)
+        assert tri.verts[2] == Point(1, 0, 0)
+        assert tri.normals[0] == Vector(0, 1, 0)
+        assert tri.normals[1] == Vector(-1, 0, 0)
+        assert tri.normals[2] == Vector(1, 0, 0)
+
+    def test_intersection_with_smooth_triangle_stores_u_and_v(self) -> None:
+        tri = self.create_standard_triangle()
+        r = Ray(Point(-0.2, 0.3, -2), Vector(0, 0, 1))
+        xs = tri._local_intersect(r)
+
+        assert math.isclose(xs[0].u, 0.45, abs_tol=EPSILON)
+        assert math.isclose(xs[0].v, 0.25, abs_tol=EPSILON)
+
+    def test_a_smooth_triangle_uses_u_and_v_to_interpolate_normals(self) -> None:
+        t = self.create_standard_triangle()
+        i = Intersection(1, t, 0.45, 0.25)
+        n = t.normal_at(Point(0, 0, 0), i)
+
+        assert n == Vector(-0.5547, 0.83205, 0)
+
+    def test_preparing_the_normal_on_a_smooth_triangle(self) -> None:
+        t = self.create_standard_triangle()
+        i = Intersection(1, t, 0.45, 0.25)
+        r = Ray(Point(-0.2, 0.3, -2), Vector(0, 0, 1))
+        xs = [i]
+        comps = Computation(i, r, xs)
+
+        assert comps.normalv == Vector(-0.5547, 0.83205, 0)

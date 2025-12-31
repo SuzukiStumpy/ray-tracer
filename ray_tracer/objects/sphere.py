@@ -14,7 +14,7 @@ class Sphere(AbstractObject):
         self.bounds = Bounds(Point(-1, -1, -1), Point(1, 1, 1))
 
     @override
-    def _normal_func(self, op: Point) -> Vector:
+    def _normal_func(self, op: Point, i: Intersection | None = None) -> Vector:
         """op is the point in object space"""
         return cast(Vector, op - Point(0, 0, 0))
 

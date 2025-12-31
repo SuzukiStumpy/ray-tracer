@@ -17,7 +17,7 @@ class Plane(AbstractObject):
         )
 
     @override
-    def _normal_func(self, op: Point) -> Vector:
+    def _normal_func(self, op: Point, i: Intersection | None = None) -> Vector:
         return Vector(0, 1, 0)
 
     @override

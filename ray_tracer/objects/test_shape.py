@@ -15,7 +15,7 @@ class TestShape(AbstractObject):
         self.bounds = Bounds(Point(-1, -1, -1), Point(1, 1, 1))
 
     # Normal for a non-existant shape is simply a zero length vector
-    def _normal_func(self, op: Point) -> Vector:
+    def _normal_func(self, op: Point, i: Intersection | None = None) -> Vector:
         return Vector(0, 0, 0)
 
     def _local_intersect(self, ray: Ray) -> list[Intersection]:

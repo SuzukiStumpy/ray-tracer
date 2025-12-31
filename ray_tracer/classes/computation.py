@@ -38,7 +38,7 @@ class Computation:
         self.obj = hit.obj
         self.point = ray.position(self.t)
         self.eyev = -ray.direction
-        self.normalv = self.obj.normal_at(self.point)
+        self.normalv = self.obj.normal_at(self.point, hit)
 
         if self.normalv.dot(self.eyev) < 0:
             self.inside = True

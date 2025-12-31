@@ -10,6 +10,8 @@ if TYPE_CHECKING:
 class Intersection:
     t: float
     obj: "AbstractObject"
+    u: float | None = None
+    v: float | None = None
 
     @staticmethod
     def hit(intersections: list[Intersection]) -> Optional[Intersection]:

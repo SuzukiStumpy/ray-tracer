@@ -4,6 +4,7 @@ import pytest
 
 import ray_tracer.objects.loader as Loader
 from ray_tracer.classes.point import Point
+from ray_tracer.classes.vector import Vector
 from ray_tracer.objects.group import Group
 
 
@@ -79,3 +80,27 @@ class TestObjectLoader:
 
         assert g.children[0] == loader.groups["FirstGroup"]
         assert g.children[1] == loader.groups["SecondGroup"]
+
+    def test_loader_suuprts_vertex_normal_records(self) -> None:
+        loader = Loader.parse_obj_file(Path("test/inputs/vertex_normal_test.obj"))
+
+        assert loader.normals[0] == Vector(0, 0, 1)
+        assert loader.normals[1] == Vector(0.707, 0, -0.707)
+        assert loader.normals[2] == Vector(1, 2, 3)
+
+    def test_faces_with_normals(self) -> None:
+        loader = Loader.parse_obj_file(
+            Path("test/inputs/faces_with_vertex_normals_test.obj")
+        )
+
+        g: Group = loader.obj_to_group()
+        t1 = g.children[0]
+        t2 = g.children[1]
+
+        assert t1.verts[0] == loader.verts[0]
+        assert t1.verts[1] == loader.verts[1]
+        assert t1.verts[2] == loader.verts[2]
+        assert t1.normals[0] == loader.normals[2]
+        assert t1.normals[1] == loader.normals[0]
+        assert t2.normals[2] == loader.normals[1]
+        assert t1 == t2

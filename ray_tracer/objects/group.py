@@ -24,7 +24,7 @@ class Group(AbstractObject):
         self.bounds = Bounds(Point(0, 0, 0), Point(0, 0, 0))
 
     @override
-    def _normal_func(self, op: Point) -> Vector:
+    def _normal_func(self, op: Point, i: Intersection | None = None) -> Vector:
         raise NotImplementedError
 
     @override
@@ -180,7 +180,10 @@ class Group(AbstractObject):
 
         g = Group()
 
-        g.add_child(low_group)
-        g.add_child(high_group)
+        if len(low_group.children) > 0:
+            g.add_child(low_group)
+
+        if len(high_group.children) > 0:
+            g.add_child(high_group)
 
         return g

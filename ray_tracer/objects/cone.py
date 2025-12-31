@@ -45,7 +45,7 @@ class Cone(AbstractObject):
         self.__dict__["max"] = m if m > self.min else self.min + EPSILON
 
     @override
-    def _normal_func(self, op: Point) -> Vector:
+    def _normal_func(self, op: Point, i: Intersection | None = None) -> Vector:
         # compute the square of the distance from the y axis
         distance = op.x**2 + op.z**2
 
