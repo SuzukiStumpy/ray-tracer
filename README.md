@@ -16,6 +16,11 @@ is used as the package manager.
   * Sphere
   * Triangle (faceted _and_ smoothed)
 
+* CSG Operations on objects
+  * Union
+  * Difference
+  * Intersection
+  
 * Groups of objects with common transformations - allows for complex objects to be 
 constructed from primitives
 
@@ -34,7 +39,7 @@ The astronaut below consists of 6381 triangle faces.  This 300x500 image rendere
 <p style="text-align: center;">
   <img src="./static_files/astronaut.png" alt="Smoothed mesh of an astronaut" width="32%" style="margin:5px;" />
 </p>
-
+ 
 * Basic materials including the following 3D patterns:
   * Stripes
   * Rings

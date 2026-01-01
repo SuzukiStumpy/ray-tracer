@@ -10,6 +10,7 @@ from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.vector import Vector
 
 if TYPE_CHECKING:
+    from ray_tracer.objects.csg import CSG
     from ray_tracer.objects.group import Group
 
 
@@ -26,7 +27,7 @@ class AbstractObject(ABC):
         self.__dict__["transform"] = Matrix.Identity()
         self.__dict__["inverse_transform"] = self.__dict__["transform"].inverse()
         self.material = Material()
-        self.parent: Group | None = None
+        self.parent: Group | CSG | None = None
 
     @property
     def bounds(self) -> Bounds:
@@ -37,7 +38,9 @@ class AbstractObject(ABC):
         self.__dict__["bounds"] = bounds
 
     def __eq__(self, other: object) -> bool:
-        ignore_keys = {"id", "parent", "children"}
+        ignore_keys = {
+            "id",
+        }  # "parent", "children"}
 
         if isinstance(other, self.__class__):
             return {k: v for k, v in self.__dict__.items() if k not in ignore_keys} == {
@@ -46,12 +49,28 @@ class AbstractObject(ABC):
         else:
             return False
 
+    def __contains__(self, other: object) -> bool:
+        if not isinstance(other, AbstractObject):
+            return False
+        elif self.__class__.__name__ == "Group" and hasattr(self, "children"):
+            for c in self.children:
+                if other in c:
+                    return True
+        elif (
+            self.__class__.__name__ == "CSG"
+            and hasattr(self, "left")
+            and hasattr(self, "right")
+        ):
+            return other in self.left or other in self.right
+        else:
+            return self == other
+
     def set_transform(self, m: Matrix) -> None:
         # Use the property to set the transform and update the cached inverse
         self.transform = m
         self.inverse_transform = m.inverse()
 
-    def set_parent(self, p: Group) -> None:
+    def set_parent(self, p: Group | CSG) -> None:
         self.parent = p
 
     @property

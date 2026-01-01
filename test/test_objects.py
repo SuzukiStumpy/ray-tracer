@@ -14,6 +14,7 @@ from ray_tracer.classes.vector import Vector
 from ray_tracer.constants import EPSILON, ROOT2, ROOT3
 from ray_tracer.objects.abstract_object import Bounds
 from ray_tracer.objects.cone import Cone
+from ray_tracer.objects.csg import CSG, CSGOperation
 from ray_tracer.objects.cube import Cube
 from ray_tracer.objects.cylinder import Cylinder
 from ray_tracer.objects.group import Group
@@ -725,3 +726,99 @@ class TestSmoothTriangle:
         comps = Computation(i, r, xs)
 
         assert comps.normalv == Vector(-0.5547, 0.83205, 0)
+
+
+class TestCSGShape:
+    def test_csg_is_created_with_an_operation_and_two_shapes(self) -> None:
+        s1 = Sphere()
+        s2 = Cube()
+
+        c = CSG(CSGOperation.union, s1, s2)
+
+        assert c.operation == CSGOperation.union
+        assert c.left == s1
+        assert c.right == s2
+        assert s1.parent == c
+        assert s2.parent == c
+
+    @pytest.mark.parametrize(
+        "op,lhit,inl,inr,result",
+        [
+            (CSGOperation.union, True, True, True, False),
+            (CSGOperation.union, True, True, False, True),
+            (CSGOperation.union, True, False, True, False),
+            (CSGOperation.union, True, False, False, True),
+            (CSGOperation.union, False, True, True, False),
+            (CSGOperation.union, False, True, False, False),
+            (CSGOperation.union, False, False, True, True),
+            (CSGOperation.union, False, False, False, True),
+            (CSGOperation.intersection, True, True, True, True),
+            (CSGOperation.intersection, True, True, False, False),
+            (CSGOperation.intersection, True, False, True, True),
+            (CSGOperation.intersection, True, False, False, False),
+            (CSGOperation.intersection, False, True, True, True),
+            (CSGOperation.intersection, False, True, False, True),
+            (CSGOperation.intersection, False, False, True, False),
+            (CSGOperation.intersection, False, False, False, False),
+            (CSGOperation.difference, True, True, True, False),
+            (CSGOperation.difference, True, True, False, True),
+            (CSGOperation.difference, True, False, True, False),
+            (CSGOperation.difference, True, False, False, True),
+            (CSGOperation.difference, False, True, True, True),
+            (CSGOperation.difference, False, True, False, True),
+            (CSGOperation.difference, False, False, True, False),
+            (CSGOperation.difference, False, False, False, False),
+        ],
+    )
+    def test_evaluating_the_rule_for_a_csg_operation(
+        self, op: CSGOperation, lhit: bool, inl: bool, inr: bool, result: bool
+    ) -> None:
+        assert CSG.intersection_allowed(op, lhit, inl, inr) == result
+
+    @pytest.mark.parametrize(
+        "op,x0,x1",
+        [
+            (CSGOperation.union, 0, 3),
+            (CSGOperation.intersection, 1, 2),
+            (CSGOperation.difference, 0, 1),
+        ],
+    )
+    def test_filtering_a_list_of_intersections(
+        self, op: CSGOperation, x0: int, x1: int
+    ) -> None:
+        s1 = Sphere()
+        s2 = Cube()
+        c = CSG(op, s1, s2)
+        xs = [
+            Intersection(1, s1),
+            Intersection(2, s2),
+            Intersection(3, s1),
+            Intersection(4, s2),
+        ]
+
+        result = c.filter_intersections(xs)
+
+        assert len(result) == 2
+        assert result[0] == xs[x0]
+        assert result[1] == xs[x1]
+
+    def test_a_ray_misses_a_csg_object(self) -> None:
+        c = CSG(CSGOperation.union, Sphere(), Cube())
+        r = Ray(Point(0, 2, -5), Vector(0, 0, 1))
+        xs = c._local_intersect(r)
+
+        assert len(xs) == 0
+
+    def test_a_ray_hits_a_csg_object(self) -> None:
+        s1 = Sphere()
+        s2 = Sphere()
+        s2.set_transform(Transforms.translation(0, 0, 0.5))
+        c = CSG(CSGOperation.union, s1, s2)
+        r = Ray(Point(0, 0, -5), Vector(0, 0, 1))
+        xs = c._local_intersect(r)
+
+        assert len(xs) == 2
+        assert xs[0].t == 4
+        assert xs[0].obj == s1
+        assert xs[1].t == 6.5
+        assert xs[1].obj == s2
