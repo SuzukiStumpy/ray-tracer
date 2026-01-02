@@ -1,13 +1,44 @@
 import math
 import time
+from multiprocessing import Pool
 from typing import cast
 
 from ray_tracer.classes.canvas import Canvas
+from ray_tracer.classes.colour import Colour
 from ray_tracer.classes.matrix import Matrix
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.ray import Ray
 from ray_tracer.classes.vector import Vector
 from ray_tracer.world import World
+
+BLOCK_SIZE = 64  # Chunk size for each process to render with when parallel processing
+
+
+# This is the main worker process when parallel rendering
+def render_block(args: tuple) -> tuple[int, int, list[tuple[int, int, Colour]]]:
+    """Render a single block of the image when multiprocessing
+
+    Args:
+        args: (camera, world, x_start, y_start, block_size)
+
+    Returns:
+        (x_start, y_start, pixel_colours)
+    """
+    camera: Camera = args[0]
+    world: World = args[1]
+    x_start: int = args[2]
+    y_start: int = args[3]
+    block_size: int = args[4]
+
+    pixels: list[tuple[int, int, Colour]] = []
+
+    for y in range(y_start, min(y_start + block_size, camera.vsize)):
+        for x in range(x_start, min(x_start + block_size, camera.hsize)):
+            ray = camera.ray_for_pixel(x, y)
+            colour: Colour = world.colour_at(ray)
+            pixels.append((x, y, colour.clamp()))
+
+    return (x_start, y_start, pixels)
 
 
 class Camera:
@@ -50,10 +81,50 @@ class Camera:
 
         return Ray(origin, direction)
 
-    def render(self, world: World) -> Canvas:
+    def render(self, world: World, parallel_render: bool = False) -> Canvas:
+        image_start = time.perf_counter()
+
+        if parallel_render:
+            image = self.render_parallel(world, BLOCK_SIZE)
+        else:
+            image = self.render_single(world)
+
+        image_end = time.perf_counter()
+        elapsed_seconds = image_end - image_start
+        elapsed_minutes = int(elapsed_seconds / 60)
+        remaining_seconds = elapsed_seconds - (elapsed_minutes * 60)
+        print(f"\nImage rendered in {elapsed_minutes}m {remaining_seconds:.2f}s")
+
+        return image
+
+    def render_parallel(self, world: World, block_size: int = 64) -> Canvas:
+        """Main rendering function used when running multi-threaded"""
         image = Canvas(self.hsize, self.vsize)
 
-        image_start = time.perf_counter()
+        # Generate block tasks to submit
+        tasks = []
+
+        print("Preparing task definitions for parallel rendering")
+        for y in range(0, self.vsize, block_size):
+            for x in range(0, self.hsize, block_size):
+                tasks.append((self, world, x, y, block_size))
+
+        # Render all blocks in parallel
+        print("Beginning render...")
+        with Pool() as pool:
+            results = pool.map(render_block, tasks)
+
+        print("Rendering complete.  Assembling final image...")
+        # Assemble the results back into the final image
+        for x_start, y_start, pixels in results:
+            for x, y, colour in pixels:
+                image.set_pixel(x, y, colour)
+
+        return image
+
+    def render_single(self, world: World) -> Canvas:
+        """Main rendering function used when running single-threaded"""
+        image = Canvas(self.hsize, self.vsize)
 
         for y in range(self.vsize):
             print(
@@ -72,12 +143,6 @@ class Camera:
             print(
                 f" : row {y + 1} rendered in {(end - start):.2f}s", end="", flush=True
             )
-
-        image_end = time.perf_counter()
-        elapsed_seconds = image_end - image_start
-        elapsed_minutes = int(elapsed_seconds / 60)
-        remaining_seconds = elapsed_seconds - (elapsed_minutes * 60)
-        print(f"\nImage rendered in {elapsed_minutes}m {remaining_seconds:.2f}s")
 
         return image
 

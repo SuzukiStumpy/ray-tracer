@@ -29,6 +29,10 @@ class Point(Tuple):
     def __repr__(self) -> str:
         return f"{self.__class__.__name__}(x={self.x}, y={self.y}, z={self.z})"
 
+    def __reduce__(self) -> tuple:
+        """Support for pickling Point objects for multiprocessing"""
+        return (self.__class__, (self.x, self.y, self.z))
+
 
 # Hide the optional `w` parameter from runtime introspection (inspect.signature
 # and help()) by setting a custom Signature that shows only (x, y, z).

@@ -61,6 +61,10 @@ class Vector(Tuple):
     def reflect(self, normal: Vector) -> Vector:
         return cast(Vector, self - (normal * 2 * self.dot(normal)))
 
+    def __reduce__(self) -> tuple:
+        """Support for pickling Vector objects for multiprocessing"""
+        return (self.__class__, (self.x, self.y, self.z))
+
 
 # Hide the optional `w` parameter from runtime introspection (inspect.signature
 # and help()) by setting a custom Signature that shows only (x, y, z).

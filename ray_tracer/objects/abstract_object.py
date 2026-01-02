@@ -38,9 +38,7 @@ class AbstractObject(ABC):
         self.__dict__["bounds"] = bounds
 
     def __eq__(self, other: object) -> bool:
-        ignore_keys = {
-            "id",
-        }  # "parent", "children"}
+        ignore_keys = {"id", "parent", "children"}
 
         if isinstance(other, self.__class__):
             return {k: v for k, v in self.__dict__.items() if k not in ignore_keys} == {
