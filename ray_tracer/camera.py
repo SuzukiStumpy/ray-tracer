@@ -1,10 +1,10 @@
 import math
 import time
 from multiprocessing import Pool
-from typing import cast
+from typing import Generator, cast
 
 from ray_tracer.classes.canvas import Canvas
-from ray_tracer.classes.colour import Colour
+from ray_tracer.classes.colour import Colour, Colours
 from ray_tracer.classes.matrix import Matrix
 from ray_tracer.classes.point import Point
 from ray_tracer.classes.ray import Ray
@@ -34,15 +34,22 @@ def render_block(args: tuple) -> tuple[int, int, list[tuple[int, int, Colour]]]:
 
     for y in range(y_start, min(y_start + block_size, camera.vsize)):
         for x in range(x_start, min(x_start + block_size, camera.hsize)):
-            ray = camera.ray_for_pixel(x, y)
-            colour: Colour = world.colour_at(ray)
+            colour = Colours.BLACK
+
+            for ray in camera.ray_for_pixel(x, y):
+                colour += world.colour_at(ray)
+
+            colour /= camera.aa_level - 1
+
             pixels.append((x, y, colour.clamp()))
 
     return (x_start, y_start, pixels)
 
 
 class Camera:
-    def __init__(self, hsize: int, vsize: int, field_of_view: float) -> None:
+    def __init__(
+        self, hsize: int, vsize: int, field_of_view: float, antialiasing_level: int = 2
+    ) -> None:
         self.hsize = hsize
         self.vsize = vsize
         self.field_of_view = field_of_view
@@ -61,25 +68,33 @@ class Camera:
 
         self.pixel_size = (self.half_width * 2) / self.hsize
 
-    def ray_for_pixel(self, px: int, py: int) -> Ray:
+        if antialiasing_level < 2:
+            self.aa_level = 2
+        else:
+            self.aa_level = antialiasing_level
+
+    def ray_for_pixel(self, px: float, py: float) -> Generator[Ray]:
         # precompute the inverse of the transformation matrix
         inv = self.inverse_transform
 
         # the offset from the edge of the canvas to the pixel's centre
-        xoffset = (px + 0.5) * self.pixel_size
-        yoffset = (py + 0.5) * self.pixel_size
+        px_offset = 1 / self.aa_level
 
-        # the untransformed coordinates of the pixel in world space
-        world_x = self.half_width - xoffset
-        world_y = self.half_height - yoffset
+        for i in range(1, self.aa_level):
+            xoffset = (px + (i * px_offset)) * self.pixel_size
+            yoffset = (py + (i * px_offset)) * self.pixel_size
 
-        # using the camera matrix, transform the canvas point and the origin then
-        # compute the ray's direction
-        pixel = cast(Point, inv * Point(world_x, world_y, -1))
-        origin = cast(Point, inv * Point(0, 0, 0))
-        direction = cast(Vector, (pixel - origin)).normalize()
+            # the untransformed coordinates of the pixel in world space
+            world_x = self.half_width - xoffset
+            world_y = self.half_height - yoffset
 
-        return Ray(origin, direction)
+            # using the camera matrix, transform the canvas point and the origin then
+            # compute the ray's direction
+            pixel = cast(Point, inv * Point(world_x, world_y, -1))
+            origin = cast(Point, inv * Point(0, 0, 0))
+            direction = cast(Vector, (pixel - origin)).normalize()
+
+            yield Ray(origin, direction)
 
     def render(self, world: World, parallel_render: bool = False) -> Canvas:
         image_start = time.perf_counter()
@@ -134,8 +149,13 @@ class Camera:
             start = time.perf_counter()
 
             for x in range(self.hsize):
-                ray = self.ray_for_pixel(x, y)
-                colour = world.colour_at(ray)
+                colour = Colours.BLACK
+
+                for ray in self.ray_for_pixel(x, y):
+                    colour += world.colour_at(ray)
+
+                colour /= self.aa_level - 1
+
                 # Clamp prevents the image from corrupting when colours go past white
                 image.set_pixel(x, y, colour.clamp())
 

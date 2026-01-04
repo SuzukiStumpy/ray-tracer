@@ -35,14 +35,14 @@ class TestCamera:
 
     def test_firing_a_ray_through_the_centre_of_the_canvas(self) -> None:
         c = Camera(201, 101, math.pi / 2)
-        r = c.ray_for_pixel(100, 50)
+        r = next(c.ray_for_pixel(100, 50))
 
         assert r.origin == Point(0, 0, 0)
         assert r.direction == Vector(0, 0, -1)
 
     def test_firing_a_ray_through_a_corner_of_the_canvas(self) -> None:
         c = Camera(201, 101, math.pi / 2)
-        r = c.ray_for_pixel(0, 0)
+        r = next(c.ray_for_pixel(0, 0))
 
         assert r.origin == Point(0, 0, 0)
         assert r.direction == Vector(0.66519, 0.33259, -0.66851)
@@ -52,7 +52,7 @@ class TestCamera:
         c.transform = Transforms.rotation_y(math.pi / 4) * Transforms.translation(
             0, -2, 5
         )
-        r = c.ray_for_pixel(100, 50)
+        r = next(c.ray_for_pixel(100, 50))
 
         assert r.origin == Point(0, 2, -5)
         assert r.direction == Vector(ROOT2 / 2, 0, -ROOT2 / 2)

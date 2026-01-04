@@ -19,6 +19,11 @@ is used as the package manager.
   pixel chunks and render each of these in separate processes.  Testing on my 8-Core machine, this
   brings the cover image render time from 11m 16s down to 2m +/- a second or two.
 
+* __Sub-Pixel Supersampling__
+  Antialiasing implemented in camera via supersampling.  This is expensive, so by default, images
+  are not antialiased.  Set the antialiasing level to > 2 to enable it.  Each increment will increase
+  the number of subdivisions per pixel according to the function num(Ray) == (aa - 1) ^ 2
+
 * __Primitive mathematical objects__:
   * Cone
   * Cube
@@ -73,6 +78,7 @@ The astronaut below consists of 6381 triangle faces.  This 300x500 image rendere
 * ~~Normal smoothing for meshes~~  DONE
 * ~~Parallel rendering~~ DONE
 * ~~Add support for multiple lights in a scene~~ DONE
+* ~~Antialiasing~~ DONE
 
 * Add different light types (area lights, spotlights, directional lights); with realistic falloff.
 

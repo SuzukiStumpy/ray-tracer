@@ -64,7 +64,7 @@ def add_cube(mat: Material, obj_type: Matrix, position: Matrix) -> Cube:
 
 
 def run() -> None:
-    camera = Camera(500, 500, 0.785)
+    camera = Camera(500, 500, 0.785, 5)
     camera.transform = Transforms.view(
         Point(-6, 6, -10), Point(6, 0, 6), Vector(-0.45, 1, 0)
     )
