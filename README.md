@@ -82,6 +82,24 @@ The astronaut below consists of 6381 triangle faces.  This 300x500 image rendere
 
 * Add different light types (area lights, spotlights, directional lights); with realistic falloff.
 
+* Soft shadows (should _hopefully_ come with Area lights)
+
+* Depth of field
+
+* Texture maps
+
+* Bump / Normal maps
+
+* Displacement mapping
+
+* More primitives
+
+* Volumetrics
+
+* Global Illumination / PBR
+
+* Ambient Occlusion
+
 * Allow materials to be inherited from parent Objects / Groups (currently there's no
 way for loaded object meshes to have materials applied except by applying to each individual
 element - which is _incredibly_ inefficient for triangle meshes!)
