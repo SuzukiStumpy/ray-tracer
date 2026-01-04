@@ -43,14 +43,19 @@ class World:
 
         shadowed = self.is_shadowed(comps.over_point)
 
-        surface = comps.obj.material.lighting(
-            comps.obj,
-            self.lights[0],
-            comps.point,
-            comps.eyev,
-            comps.normalv,
-            shadowed,
-        )
+        # For surface colour, start from black, then build up based on all scene lights
+        surface = Colours.BLACK
+
+        for light in self.lights:
+            surface += comps.obj.material.lighting(
+                comps.obj,
+                light,
+                comps.point,
+                comps.eyev,
+                comps.normalv,
+                shadowed,
+            )
+
         reflected = self.reflected_colour(comps, remaining)
         refracted = self.refracted_colour(comps, remaining)
 
@@ -125,20 +130,21 @@ class World:
         )
 
     def is_shadowed(self, p: Point) -> bool:
-        v: Vector = self.lights[0].position - p
-        distance = abs(v)
-        direction = v.normalize()
+        for light in self.lights:
+            v: Vector = light.position - p
+            distance = abs(v)
+            direction = v.normalize()
 
-        r = Ray(p, direction)
-        xs = self.intersect(r)
+            r = Ray(p, direction)
+            xs = self.intersect(r)
 
-        h = Intersection.hit(xs)
-
-        while h is not None and h.obj.material.cast_shadows is False:
-            xs.remove(h)
             h = Intersection.hit(xs)
 
-        # Have to cast to boolean here since h.t < distance returns a numpy
-        # boolean.  so np.True_ rather than True.  Much time was wasted tracking
-        # down this little nugget.  Bastard.
-        return bool(h is not None and h.t < distance)
+            while h is not None and h.obj.material.cast_shadows is False:
+                xs.remove(h)
+                h = Intersection.hit(xs)
+
+            # Have to cast to boolean here since h.t < distance returns a numpy
+            # boolean.  so np.True_ rather than True.  Much time was wasted tracking
+            # down this little nugget.  Bastard.
+            return bool(h is not None and h.t < distance)

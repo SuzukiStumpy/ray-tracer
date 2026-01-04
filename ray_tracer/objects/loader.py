@@ -45,7 +45,6 @@ class Loader:
         for key in self.groups.keys():
             g.add_child(self.groups[key])
 
-        # For now, this isn't functioning...
         g = g.optimize()
 
         return g

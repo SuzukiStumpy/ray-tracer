@@ -72,10 +72,9 @@ The astronaut below consists of 6381 triangle faces.  This 300x500 image rendere
 ## To-Do:
 * ~~Normal smoothing for meshes~~  DONE
 * ~~Parallel rendering~~ DONE
+* ~~Add support for multiple lights in a scene~~ DONE
 
 * Add different light types (area lights, spotlights, directional lights); with realistic falloff.
-
-* Add support for multiple lights in a scene
 
 * Allow materials to be inherited from parent Objects / Groups (currently there's no
 way for loaded object meshes to have materials applied except by applying to each individual

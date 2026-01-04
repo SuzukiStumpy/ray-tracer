@@ -1,5 +1,7 @@
+import math
 from typing import Self, overload
 
+from ray_tracer.constants import EPSILON
 from ray_tracer.utils import clamp
 
 from .abstract_tuple import AbstractTuple
@@ -97,7 +99,10 @@ class Colour(AbstractTuple):
         )
 
     def __truediv__(self, other: float) -> Self:
-        raise NotImplementedError
+        if math.isclose(other, 0, abs_tol=EPSILON):
+            raise ZeroDivisionError
+
+        return Colour(self.r / other, self.g / other, self.b / other)
 
     def clamp(self) -> Self:
         return Colour(

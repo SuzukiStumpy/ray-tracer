@@ -40,6 +40,9 @@ class AbstractObject(ABC):
     def __eq__(self, other: object) -> bool:
         ignore_keys = {"id", "parent", "children"}
 
+        if self.__class__.__name__ == "Group":
+            ignore_keys.remove("id")
+
         if isinstance(other, self.__class__):
             return {k: v for k, v in self.__dict__.items() if k not in ignore_keys} == {
                 k: v for k, v in other.__dict__.items() if k not in ignore_keys
